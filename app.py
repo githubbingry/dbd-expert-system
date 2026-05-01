@@ -3,7 +3,7 @@
 import json
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, redirect
 from enums import QUESTIONS
 
 app = Flask(__name__)
@@ -115,11 +115,11 @@ class BackwardChainingEngine:
             self.facts[attribute] = Fact(attribute, value, derived=derived, rule_used=rule_id)
             if derived:
                 self.add_debug_step('fact_derived', depth, 
-                                   f"✓ Derived: {attribute} = {value} using Rule {rule_id}",
+                                   f"Derived fact: {attribute} = {value} using Rule {rule_id}",
                                    rule_id=rule_id, attribute=attribute, value=value)
             else:
                 self.add_debug_step('fact_input', depth,
-                                   f"📝 User input: {attribute} = {value}",
+                                   f"User input: {attribute} = {value}",
                                    attribute=attribute, value=value)
             return True
         return False
@@ -236,14 +236,14 @@ class BackwardChainingEngine:
         goal_key = f"{goal_attr}:{goal_value}" if goal_value else goal_attr
         if goal_key in self.goal_stack:
             self.add_debug_step('cycle_detected', depth,
-                            f"⚠️ Cycle detected! Already trying to prove {goal_key}",
+                            f"Cycle detected. Already trying to prove {goal_key}",
                             attribute=goal_attr, value=goal_value)
             return False
         
         # Log goal attempt
         goal_display = f"{goal_attr} = {goal_value}" if goal_value else f"{goal_attr} = ?"
         self.add_debug_step('goal_attempt', depth, 
-                        f"🎯 Proving: {goal_display}",
+                        f"Proving: {goal_display}",
                         attribute=goal_attr, value=goal_value)
         
         # Push to goal stack
@@ -254,13 +254,13 @@ class BackwardChainingEngine:
         if existing is not None:
             if goal_value is None or existing == goal_value:
                 self.add_debug_step('goal_found', depth, 
-                                f"✅ Goal already known: {goal_attr} = {existing}",
+                                f"Goal already known: {goal_attr} = {existing}",
                                 attribute=goal_attr, value=existing)
                 self.goal_stack.pop()
                 return True
             else:
                 self.add_debug_step('goal_fail', depth,
-                                f"❌ Goal exists but value mismatch: {goal_attr} = {existing} (need {goal_value})",
+                                f"Goal exists but value mismatch: {goal_attr} = {existing} (need {goal_value})",
                                 attribute=goal_attr, value=existing)
                 self.goal_stack.pop()
                 return False
@@ -270,13 +270,13 @@ class BackwardChainingEngine:
         
         if not rules:
             self.add_debug_step('no_rules', depth,
-                            f"❌ No rules found that can derive {goal_display}",
+                            f"No rules found that can derive {goal_display}",
                             attribute=goal_attr, value=goal_value)
             self.goal_stack.pop()
             return False
         
         self.add_debug_step('rules_found', depth,
-                        f"📋 Found {len(rules)} rule(s) that can derive {goal_display}")
+                        f"Found {len(rules)} rule(s) that can derive {goal_display}")
         
         # Try each rule
         for rule_index, rule in enumerate(rules):
@@ -286,7 +286,7 @@ class BackwardChainingEngine:
                 antecedent_summary += "..."
             
             self.add_debug_step('rule_attempt', depth,
-                            f"🔍 Trying Rule {rule.rule_id} (Set {rule.set}): IF {antecedent_summary} THEN {goal_attr}={rule.consequent[goal_attr]}",
+                            f"Trying Rule {rule.rule_id} (Set {rule.set}): IF {antecedent_summary} THEN {goal_attr}={rule.consequent[goal_attr]}",
                             rule_id=rule.rule_id)
             
             # Check current satisfaction status
@@ -295,7 +295,7 @@ class BackwardChainingEngine:
             if satisfied:
                 # All antecedents satisfied - fire rule
                 self.add_debug_step('rule_fire', depth,
-                                f"✅ Rule {rule.rule_id} antecedents satisfied! Firing rule.",
+                                f"Rule {rule.rule_id} antecedents satisfied. Firing rule.",
                                 rule_id=rule.rule_id)
                 for attr, val in rule.consequent.items():
                     self.assert_fact(attr, val, derived=True, rule_id=rule.rule_id, depth=depth)
@@ -306,7 +306,7 @@ class BackwardChainingEngine:
                 # Try to prove missing antecedents
                 if missing:
                     self.add_debug_step('rule_missing', depth,
-                                    f"⚠️ Rule {rule.rule_id} needs: {', '.join(missing)}",
+                                    f"Rule {rule.rule_id} needs: {', '.join(missing)}",
                                     rule_id=rule.rule_id)
                     
                     # Store current facts before trying to prove missing antecedents
@@ -318,33 +318,33 @@ class BackwardChainingEngine:
                     
                     for missing_attr in missing:
                         self.add_debug_step('subgoal', depth + 1,
-                                        f"📌 Establishing subgoal: {missing_attr}",
+                                        f"Establishing subgoal: {missing_attr}",
                                         attribute=missing_attr)
                         
                         # Try to prove this missing antecedent
                         if self.backward_chain(missing_attr, depth=depth + 1):
                             proven_antecedents.append(missing_attr)
                             self.add_debug_step('subgoal_success', depth + 1,
-                                            f"✅ Successfully proved {missing_attr} = {self.get_fact(missing_attr)}",
+                                            f"Successfully proved {missing_attr} = {self.get_fact(missing_attr)}",
                                             attribute=missing_attr)
                         else:
                             all_proven = False
                             self.add_debug_step('subgoal_fail', depth + 1,
-                                            f"❌ Failed to prove {missing_attr}",
+                                            f"Failed to prove {missing_attr}",
                                             attribute=missing_attr)
                             break
                     
                     if all_proven:
                         # Re-check the SAME rule after proving missing facts
                         self.add_debug_step('recheck_rule', depth,
-                                        f"🔄 Re-checking Rule {rule.rule_id} after proving subgoals...",
+                                        f"Re-checking Rule {rule.rule_id} after proving subgoals...",
                                         rule_id=rule.rule_id)
                         
                         satisfied, remaining_missing, _ = self.check_rule_antecedents(rule)
                         
                         if satisfied:
                             self.add_debug_step('rule_fire_after_subgoals', depth,
-                                            f"✅ Rule {rule.rule_id} now satisfied after proving subgoals!",
+                                            f"Rule {rule.rule_id} now satisfied after proving subgoals.",
                                             rule_id=rule.rule_id)
                             for attr, val in rule.consequent.items():
                                 self.assert_fact(attr, val, derived=True, rule_id=rule.rule_id, depth=depth)
@@ -357,7 +357,7 @@ class BackwardChainingEngine:
                             # instead of giving up on this rule
                             if remaining_missing:
                                 self.add_debug_step('rule_still_missing', depth,
-                                                f"⚠️ Rule {rule.rule_id} still missing: {', '.join(remaining_missing)}",
+                                                f"Rule {rule.rule_id} still missing: {', '.join(remaining_missing)}",
                                                 rule_id=rule.rule_id)
                                 
                                 # Check which missing antecedents are new vs already attempted
@@ -368,24 +368,24 @@ class BackwardChainingEngine:
                                 
                                 if remaining_to_prove:
                                     self.add_debug_step('continuing_subgoals', depth,
-                                                    f"🔄 Continuing to prove remaining missing: {', '.join(remaining_to_prove)}",
+                                                    f"Continuing to prove remaining missing: {', '.join(remaining_to_prove)}",
                                                     rule_id=rule.rule_id)
                                     
                                     # Continue trying to prove remaining missing antecedents
                                     still_all_proven = True
                                     for missing_attr in remaining_to_prove:
                                         self.add_debug_step('subgoal', depth + 1,
-                                                        f"📌 Establishing subgoal: {missing_attr}",
+                                                        f"Establishing subgoal: {missing_attr}",
                                                         attribute=missing_attr)
                                         
                                         if self.backward_chain(missing_attr, depth=depth + 1):
                                             self.add_debug_step('subgoal_success', depth + 1,
-                                                            f"✅ Successfully proved {missing_attr} = {self.get_fact(missing_attr)}",
+                                                            f"Successfully proved {missing_attr} = {self.get_fact(missing_attr)}",
                                                             attribute=missing_attr)
                                         else:
                                             still_all_proven = False
                                             self.add_debug_step('subgoal_fail', depth + 1,
-                                                            f"❌ Failed to prove {missing_attr}",
+                                                            f"Failed to prove {missing_attr}",
                                                             attribute=missing_attr)
                                             break
                                     
@@ -394,7 +394,7 @@ class BackwardChainingEngine:
                                         satisfied, final_missing, _ = self.check_rule_antecedents(rule)
                                         if satisfied:
                                             self.add_debug_step('rule_fire_after_all_subgoals', depth,
-                                                            f"✅ Rule {rule.rule_id} finally satisfied after proving all subgoals!",
+                                                            f"Rule {rule.rule_id} finally satisfied after proving all subgoals.",
                                                             rule_id=rule.rule_id)
                                             for attr, val in rule.consequent.items():
                                                 self.assert_fact(attr, val, derived=True, rule_id=rule.rule_id, depth=depth)
@@ -403,36 +403,36 @@ class BackwardChainingEngine:
                                             return True
                                         else:
                                             self.add_debug_step('rule_fail', depth,
-                                                            f"❌ Rule {rule.rule_id} still has missing: {', '.join(final_missing)}",
+                                                            f"Rule {rule.rule_id} still has missing: {', '.join(final_missing)}",
                                                             rule_id=rule.rule_id)
                                     else:
                                         self.add_debug_step('rule_fail', depth,
-                                                        f"❌ Rule {rule.rule_id} failed - could not prove remaining antecedents",
+                                                        f"Rule {rule.rule_id} failed - could not prove remaining antecedents",
                                                         rule_id=rule.rule_id)
                                 else:
                                     # All missing were already attempted but still missing - something wrong
                                     self.add_debug_step('rule_fail', depth,
-                                                    f"❌ Rule {rule.rule_id} failed - missing antecedents persist: {', '.join(remaining_missing)}",
+                                                    f"Rule {rule.rule_id} failed - missing antecedents persist: {', '.join(remaining_missing)}",
                                                     rule_id=rule.rule_id)
                             else:
                                 # No missing but rule not satisfied - shouldn't happen
                                 self.add_debug_step('rule_fail', depth,
-                                                f"❌ Rule {rule.rule_id} failed - no missing but not satisfied",
+                                                f"Rule {rule.rule_id} failed - no missing but not satisfied",
                                                 rule_id=rule.rule_id)
                     else:
                         # Failed to prove some antecedents, try next rule
                         self.add_debug_step('rule_fail', depth,
-                                        f"❌ Rule {rule.rule_id} failed - could not prove all antecedents",
+                                        f"Rule {rule.rule_id} failed - could not prove all antecedents",
                                         rule_id=rule.rule_id)
                         # Continue to next rule
                         continue
                 else:
                     # No missing variables but rule not satisfied (shouldn't happen)
                     self.add_debug_step('rule_fail', depth,
-                                    f"❌ Rule {rule.rule_id} failed for unknown reason",
+                                    f"Rule {rule.rule_id} failed for unknown reason",
                                     rule_id=rule.rule_id)
         
-        self.add_debug_step('goal_fail', depth, f"❌ Could not prove {goal_display} after trying all rules")
+        self.add_debug_step('goal_fail', depth, f"Could not prove {goal_display} after trying all rules")
         self.goal_stack.pop()
         return False
     
@@ -448,17 +448,17 @@ class BackwardChainingEngine:
                 self.assert_fact(attr, value, derived=False, depth=0)
         
         # Perform backward chaining to prove goal
-        self.add_debug_step('start', 0, f"🚀 Starting Backward Chaining to prove: {goal}")
+        self.add_debug_step('start', 0, f"Starting Backward Chaining to prove: {goal}")
         success = self.backward_chain(goal)
         
         # Add conclusion step
         if success:
             result_value = self.get_fact(goal)
             self.add_debug_step('conclusion', 0, 
-                               f"🏁 CONCLUSION: {goal} = {result_value} (Successfully proved!)")
+                               f"CONCLUSION: {goal} = {result_value} (successfully proved)")
         else:
             self.add_debug_step('conclusion', 0,
-                               f"🏁 CONCLUSION: Could not determine {goal} from given facts")
+                               f"CONCLUSION: Could not determine {goal} from given facts")
         
         # Get result
         result_value = self.get_fact(goal)
@@ -490,12 +490,22 @@ engine = BackwardChainingEngine(knowledge_base)
 @app.route('/')
 def index():
     """Home page"""
-    return render_template('dbd_index.html', questions=QUESTIONS)
+    return render_template(
+        'dbd_index.html',
+        questions=QUESTIONS,
+        rules_count=len(RULES_DATA['rules']),
+        question_count=len(QUESTIONS)
+    )
 
 @app.route('/survey')
 def survey():
-    """Survey page with all questions"""
+    """Survey page"""
     return render_template('dbd_survey.html', questions=QUESTIONS)
+
+@app.route('/result')
+def result_page():
+    """Result page loaded from browser storage"""
+    return render_template('dbd_result.html')
 
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
@@ -515,9 +525,9 @@ def evaluate():
         
         # Add human-readable risk interpretation
         risk_levels = {
-            'rendah': {'color': 'success', 'icon': '🟢', 'message': 'Risiko DBD Rendah - Kondisi cukup aman, tetap waspada'},
-            'sedang': {'color': 'warning', 'icon': '🟡', 'message': 'Risiko DBD Sedang - Perlu peningkatan kewaspadaan'},
-            'tinggi': {'color': 'danger', 'icon': '🔴', 'message': 'Risiko DBD Tinggi - Segera lakukan tindakan pencegahan!'}
+            'rendah': {'color': 'success', 'icon': '', 'message': 'Risiko DBD rendah. Kondisi cukup aman, tetap lakukan pemantauan berkala.'},
+            'sedang': {'color': 'warning', 'icon': '', 'message': 'Risiko DBD sedang. Perlu peningkatan kewaspadaan dan pencegahan lingkungan.'},
+            'tinggi': {'color': 'danger', 'icon': '', 'message': 'Risiko DBD tinggi. Segera lakukan tindakan pencegahan dan koordinasi lingkungan.'}
         }
         
         risk_info = risk_levels.get(result['tingkat_resiko_dbd'], risk_levels['rendah'])
@@ -556,13 +566,22 @@ def evaluate():
 
 @app.route('/explanation')
 def explanation():
-    """Explanation page showing how backward chaining works"""
-    return render_template('dbd_explanation.html')
+    """Legacy explanation page"""
+    return redirect('/')
 
 @app.route('/debug')
 def debug_page():
-    """Debug page with step-by-step visualization"""
-    return render_template('dbd_debug.html', questions=QUESTIONS)
+    """Legacy debug page"""
+    return redirect('/dev')
+
+@app.route('/dev')
+def dev_page():
+    """Dev page with step-by-step visualization"""
+    return render_template(
+        'dbd_debug.html',
+        questions=QUESTIONS,
+        rules_count=len(RULES_DATA['rules'])
+    )
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

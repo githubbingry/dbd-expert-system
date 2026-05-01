@@ -1,252 +1,621 @@
-<!-- templates/dbd_index.html - Landing Page -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pakar DBD - Analisis Risiko Demam Berdarah</title>
+    <title>DBD Care - Cek Potensi Demam Berdarah</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --ink: #17324d;
+            --muted: #64748b;
+            --line: #d9e4ea;
+            --soft: #f4f9f8;
+            --teal: #0f766e;
+            --teal-dark: #115e59;
+            --blue: #0f4c81;
+            --red: #be123c;
+            --amber: #b7791f;
+            --green: #15803d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            margin: 0;
+            color: var(--ink);
+            background: #f7fbfb;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
         }
-        .hero-card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 30px;
-            padding: 3rem;
-            margin-top: 3rem;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(12px);
         }
-        .btn-backward {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            border: none;
-            padding: 14px 40px;
-            font-weight: 600;
-            border-radius: 50px;
-            transition: all 0.3s;
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: var(--teal);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn-backward:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .btn-debug {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 14px 40px;
-            font-weight: 600;
-            border-radius: 50px;
-            transition: all 0.3s;
-        }
-        .btn-debug:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .expert-badge {
-            background: #dc3545;
-            color: white;
-            padding: 5px 18px;
-            border-radius: 30px;
-            font-size: 0.85rem;
+
+        .nav-link {
+            color: var(--ink);
             font-weight: 600;
         }
-        .feature-box {
-            background: #f8f9fa;
-            border-radius: 20px;
-            padding: 1.5rem;
-            text-align: center;
+
+        .nav-link:hover {
+            color: var(--teal);
+        }
+
+        .hero {
+            min-height: calc(100vh - 72px);
+            display: grid;
+            align-items: center;
+            padding: 56px 0 42px;
+            background:
+                linear-gradient(90deg, rgba(244, 249, 248, 0.98) 0%, rgba(244, 249, 248, 0.9) 45%, rgba(244, 249, 248, 0.28) 100%),
+                url("https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Aedes_aegypti_biting_human.jpg/960px-Aedes_aegypti_biting_human.jpg") center right / cover no-repeat;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .hero-copy {
+            max-width: 720px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--teal-dark);
+            background: #e4f5f1;
+            border: 1px solid #b7e3da;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-weight: 700;
+            font-size: 0.84rem;
+        }
+
+        h1 {
+            margin-top: 22px;
+            font-size: clamp(2.4rem, 6vw, 5rem);
+            line-height: 1;
+            letter-spacing: 0;
+            font-weight: 800;
+        }
+
+        .hero-lead {
+            color: #334155;
+            max-width: 650px;
+            font-size: 1.1rem;
+            line-height: 1.75;
+            margin: 22px 0 28px;
+        }
+
+        .btn-primary-health {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 48px;
+            background: var(--red);
+            border: 1px solid var(--red);
+            color: #fff;
+            border-radius: 8px;
+            padding: 13px 20px;
+            text-decoration: none;
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(190, 18, 60, 0.18);
+        }
+
+        .btn-primary-health:hover {
+            color: #fff;
+            background: #9f1239;
+            border-color: #9f1239;
+        }
+
+        .btn-outline-health {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 48px;
+            border: 1px solid #9ab0bd;
+            color: var(--ink);
+            border-radius: 8px;
+            padding: 13px 18px;
+            text-decoration: none;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .btn-outline-health:hover {
+            color: var(--teal-dark);
+            border-color: var(--teal);
+            background: #fff;
+        }
+
+        .section {
+            padding: 72px 0;
+        }
+
+        .section.alt {
+            background: #ffffff;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section-title {
+            max-width: 780px;
+            margin-bottom: 34px;
+        }
+
+        .section-title h2 {
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .section-title p {
+            color: var(--muted);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .feature-card,
+        .history-card,
+        .info-card {
             height: 100%;
-            transition: all 0.3s;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 24px;
         }
-        .feature-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+
+        .feature-card .icon,
+        .info-card .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #e4f5f1;
+            color: var(--teal-dark);
+            margin-bottom: 18px;
+            font-size: 1.15rem;
         }
-        .backward-icon {
-            font-size: 2.5rem;
+
+        .feature-card h3,
+        .info-card h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 10px;
         }
-        .demo-inputs {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-top: 2rem;
+
+        .feature-card p,
+        .info-card p {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.65;
         }
-        .btn-demo {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin: 3px;
+
+        .metric {
+            font-size: 2.3rem;
+            line-height: 1;
+            font-weight: 800;
+            color: var(--blue);
+            margin-bottom: 8px;
         }
-        .btn-demo:hover {
-            background: #5a6268;
+
+        .history-shell {
+            background: #f4f9f8;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .history-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .history-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 18px;
+            align-items: center;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .history-item h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            margin: 0 0 5px;
+        }
+
+        .history-meta {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+        }
+
+        .risk-rendah {
+            color: var(--green);
+            background: #eaf7ed;
+            border-color: #bce3c5;
+        }
+
+        .risk-sedang {
+            color: var(--amber);
+            background: #fff7df;
+            border-color: #f5df9d;
+        }
+
+        .risk-tinggi {
+            color: var(--red);
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+
+        .empty-state {
+            padding: 34px 20px;
+            text-align: center;
+            color: var(--muted);
+            background: #fff;
+            border: 1px dashed #b9cbd4;
+            border-radius: 8px;
+        }
+
+        .btn-small {
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--ink);
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-weight: 700;
+        }
+
+        .btn-small:hover {
+            border-color: var(--teal);
+            color: var(--teal-dark);
+        }
+
+        .footer {
+            color: var(--muted);
+            padding: 30px 0;
+            border-top: 1px solid var(--line);
+            background: #fff;
+            font-size: 0.92rem;
+        }
+
+        .footer a {
+            color: var(--teal-dark);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        @media (max-width: 991px) {
+            .hero {
+                min-height: auto;
+                padding: 52px 0;
+                background:
+                    linear-gradient(180deg, rgba(244, 249, 248, 0.98) 0%, rgba(244, 249, 248, 0.9) 58%, rgba(244, 249, 248, 0.65) 100%),
+                    url("https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Aedes_aegypti_biting_human.jpg/960px-Aedes_aegypti_biting_human.jpg") center / cover no-repeat;
+            }
+
+            .history-item {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .site-nav .d-flex.gap-3 {
+                gap: 8px !important;
+            }
+
+            .btn-primary-health,
+            .btn-outline-health {
+                width: 100%;
+            }
+
+            .hero-actions {
+                width: 100%;
+            }
+
+            .history-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="hero-card">
-            <div class="text-center mb-4">
-                <span class="expert-badge">🦟 SISTEM PAKAR BACKWARD CHAINING</span>
-                <h1 class="display-4 mt-3">Analisis Risiko DBD</h1>
-                <p class="lead">Sistem pakar dengan metode <strong>Backward Chaining</strong> untuk menganalisis risiko Demam Berdarah Dengue</p>
-            </div>
-
-            <div class="row mt-5 g-4">
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <div class="backward-icon">🎯</div>
-                        <h5>Goal-Driven Reasoning</h5>
-                        <p class="small text-muted">Sistem memulai dari hipotesis (goal) dan bekerja mundur mencari fakta yang mendukung</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <div class="backward-icon">📋</div>
-                        <h5>49 Rule Based</h5>
-                        <p class="small text-muted">Knowledge base dengan 49 aturan yang mencakup 4 set: potensi, iklim, eksposur, dan risiko</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <div class="backward-icon">🔍</div>
-                        <h5>Explanation Facility</h5>
-                        <p class="small text-muted">Sistem dapat menjelaskan alur penalaran backward chaining yang digunakan</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Demo Scenario Inputs -->
-            <div class="demo-inputs">
-                <h5 class="text-center mb-3"><i class="fas fa-flask"></i> Coba dengan Skenario Demo</h5>
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <button class="btn-demo w-100" onclick="setDemoScenario('rendah')">
-                            🟢 Skenario Risiko Rendah
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn-demo w-100" onclick="setDemoScenario('sedang')">
-                            🟡 Skenario Risiko Sedang
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn-demo w-100" onclick="setDemoScenario('tinggi')">
-                            🔴 Skenario Risiko Tinggi
-                        </button>
-                    </div>
-                </div>
-                <div id="demoFeedback" class="text-center small text-muted mt-2"></div>
-            </div>
-
-            <div class="text-center mt-4">
-                <a href="/survey" class="btn btn-backward text-white">
-                    🚀 Mulai Analisis Risiko DBD
-                </a>
-                <button onclick="goToDebugWithData()" class="btn btn-debug text-white ms-3" id="debugBtn">
-                    🔍 Buka Debug Mode
-                </button>
-                <a href="/explanation" class="btn btn-outline-secondary ms-3">
-                    📖 Cara Kerja Backward Chaining
-                </a>
-            </div>
-
-            <div class="mt-5 pt-4 text-center text-muted small">
-                <p>🔬 Berdasarkan 49 aturan pakar | Metode: Backward Chaining | Domain: Kesehatan Masyarakat</p>
-                <p class="mb-0">Variabel input: genangan air, durasi, jentik, nyamuk, hujan, mobilitas, kepadatan, lingkungan</p>
+    <nav class="site-nav">
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <a href="/" class="d-flex align-items-center gap-3 text-decoration-none text-dark">
+                <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-shield-heart"></i></span>
+                <span class="fw-bold">DBD Care</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <a class="nav-link" href="/">Beranda</a>
+                <a class="nav-link" href="/survey">Survey</a>
+                <a class="nav-link" href="/result">Result</a>
             </div>
         </div>
-    </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <div class="hero-copy">
+                <span class="eyebrow"><i class="fa-solid fa-notes-medical"></i> Sistem Pakar Potensi DBD</span>
+                <h1>Cek potensi demam berdarah dari kondisi lingkungan sekitar.</h1>
+                <p class="hero-lead">
+                    Demam berdarah ditularkan melalui gigitan nyamuk Aedes. Lingkungan dengan genangan air,
+                    jentik, curah hujan tertentu, dan kepadatan aktivitas manusia dapat meningkatkan potensi
+                    perkembangbiakan serta paparan. Survey ini membantu membaca kondisi tersebut secara cepat
+                    dengan sistem pakar berbasis backward chaining.
+                </p>
+                <div class="hero-actions d-flex flex-wrap gap-3">
+                    <a href="/survey" class="btn-primary-health">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        Ayo Cek Potensi Demam Berdarah di Sekitarmu
+                    </a>
+                    <a href="#history" class="btn-outline-health">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Lihat Riwayat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Mengapa perlu cek potensi DBD?</h2>
+                    <p>
+                        Pencegahan DBD paling efektif dimulai dari lingkungan. Wadah air terbuka, barang bekas
+                        yang menampung hujan, saluran tersumbat, dan aktivitas warga yang padat dapat membuat
+                        risiko lokal meningkat sebelum gejala penyakit terlihat di masyarakat.
+                    </p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <div class="icon"><i class="fa-solid fa-droplet"></i></div>
+                            <h3>Genangan kecil tetap penting</h3>
+                            <p>Nyamuk Aedes dapat berkembang pada wadah yang menampung air. Karena itu, pemeriksaan rutin pada bak, ember, pot, ban bekas, dan talang menjadi langkah awal.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <div class="icon"><i class="fa-solid fa-cloud-rain"></i></div>
+                            <h3>Musim hujan mengubah kondisi</h3>
+                            <p>Hujan dapat menambah sumber genangan baru. Kondisi setelah hujan perlu dipantau karena perubahan lingkungan sering terjadi cepat.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-card">
+                            <div class="icon"><i class="fa-solid fa-people-group"></i></div>
+                            <h3>Paparan dipengaruhi aktivitas</h3>
+                            <p>Kepadatan dan mobilitas warga dapat memperluas paparan. Hasil survey membantu menentukan prioritas pembersihan dan edukasi lingkungan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section alt">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Fitur utama</h2>
+                    <p>Dirancang untuk screening lingkungan, bukan diagnosis medis. Hasil digunakan sebagai panduan kewaspadaan dan tindakan pencegahan.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card">
+                            <div class="metric">{{ rules_count }}</div>
+                            <h3>Rule pakar</h3>
+                            <p>Basis pengetahuan berlapis untuk potensi perkembangbiakan, iklim, eksposur, dan risiko.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card">
+                            <div class="metric">{{ question_count }}</div>
+                            <h3>Parameter survey</h3>
+                            <p>Pertanyaan mencakup kondisi air, jentik, nyamuk, hujan, mobilitas, kepadatan, dan kebersihan.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card">
+                            <div class="icon"><i class="fa-solid fa-list-check"></i></div>
+                            <h3>Saran relevan</h3>
+                            <p>Rekomendasi muncul sesuai jawaban yang berisiko, sehingga pengguna tidak dibebani saran yang tidak diperlukan.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-card">
+                            <div class="icon"><i class="fa-solid fa-database"></i></div>
+                            <h3>Riwayat browser</h3>
+                            <p>Hasil survey terakhir tersimpan di perangkat pengguna menggunakan penyimpanan browser.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="history">
+            <div class="container">
+                <div class="history-shell">
+                    <div class="history-head">
+                        <div>
+                            <h2 class="h4 fw-bold mb-1">History Survey</h2>
+                            <p class="mb-0 text-muted">Data tersimpan di browser ini dan dapat berbeda di perangkat lain.</p>
+                        </div>
+                        <button class="btn-small" id="clearHistoryBtn" type="button">
+                            <i class="fa-solid fa-trash-can me-2"></i>Hapus Riwayat
+                        </button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">Memuat riwayat survey.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container d-flex flex-wrap justify-content-between gap-2">
+            <span>DBD Care menggunakan inferensi backward chaining untuk membaca potensi lingkungan.</span>
+            <span>
+                Rujukan edukasi:
+                <a href="https://ayosehat.kemkes.go.id/pemberantasan-sarang-nyamuk-dengan-3m-plus" target="_blank" rel="noopener">Kemenkes 3M Plus</a>
+                dan
+                <a href="https://www.cdc.gov/mosquitoes/mosquito-control/mosquito-control-at-home.html" target="_blank" rel="noopener">CDC Mosquito Control</a>
+            </span>
+        </div>
+    </footer>
 
     <script>
-        // Store current demo answers
-        let currentDemoAnswers = null;
+        const HISTORY_KEY = "dbdSurveyHistory";
+        const LATEST_KEY = "dbdLatestResult";
 
-        // Demo scenarios data
-        const demoScenarios = {
-            'rendah': {
-                'genangan_air_terbuka': 'tidak_ada',
-                'durasi_genangan_air': '',
-                'keberadaan_jentik': 'tidak_ada',
-                'nyamuk_aedes': 'tidak_terlihat',
-                'frekuensi_hujan': 'jarang',
-                'intensitas_hujan': 'ringan',
-                'mobilitas_penduduk': 'rendah',
-                'kepadatan_penduduk': 'renggang',
-                'kondisi_lingkungan_sekitar': 'bersih'
-            },
-            'sedang': {
-                'genangan_air_terbuka': 'ada',
-                'durasi_genangan_air': '3-6 hari',
-                'keberadaan_jentik': 'jarang',
-                'nyamuk_aedes': 'jarang',
-                'frekuensi_hujan': 'jarang',
-                'intensitas_hujan': 'sedang',
-                'mobilitas_penduduk': 'rendah',
-                'kepadatan_penduduk': 'padat',
-                'kondisi_lingkungan_sekitar': 'bersih'
-            },
-            'tinggi': {
-                'genangan_air_terbuka': 'ada',
-                'durasi_genangan_air': '>=7 hari',
-                'keberadaan_jentik': 'luas',
-                'nyamuk_aedes': 'banyak',
-                'frekuensi_hujan': 'sering',
-                'intensitas_hujan': 'deras',
-                'mobilitas_penduduk': 'tinggi',
-                'kepadatan_penduduk': 'padat',
-                'kondisi_lingkungan_sekitar': 'kumuh'
+        function readHistory() {
+            try {
+                const raw = localStorage.getItem(HISTORY_KEY);
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
             }
-        };
-
-        function setDemoScenario(level) {
-            currentDemoAnswers = demoScenarios[level];
-            const feedback = document.getElementById('demoFeedback');
-            feedback.innerHTML = `✅ Skenario ${level === 'rendah' ? 'Risiko Rendah' : level === 'sedang' ? 'Risiko Sedang' : 'Risiko Tinggi'} telah dipilih. Klik "Buka Debug Mode" untuk melihat analisis.`;
-            feedback.style.color = level === 'rendah' ? '#27ae60' : level === 'sedang' ? '#f39c12' : '#e74c3c';
-            
-            // Enable debug button with highlight effect
-            const debugBtn = document.getElementById('debugBtn');
-            debugBtn.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                debugBtn.style.transform = '';
-            }, 500);
         }
 
-        function goToDebugWithData() {
-            let answers = currentDemoAnswers;
-            
-            if (!answers) {
-                // Jika tidak ada skenario yang dipilih, tanyakan apakah ingin menggunakan default
-                if (confirm('Belum ada skenario yang dipilih. Gunakan data default (Risiko Sedang)?')) {
-                    answers = demoScenarios['sedang'];
-                } else {
-                    return;
-                }
-            }
-            
-            // Encode answers to URL parameters
-            const params = new URLSearchParams();
-            for (const [key, value] of Object.entries(answers)) {
-                if (value && value !== '') {
-                    params.append(key, value);
-                }
-            }
-            
-            // Redirect to debug page with parameters
-            window.location.href = `/debug?${params.toString()}`;
+        function formatDate(value) {
+            if (!value) return "-";
+            return new Intl.DateTimeFormat("id-ID", {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }).format(new Date(value));
         }
 
-        // Optional: Add keyboard shortcut (Ctrl+D) to open debug
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                goToDebugWithData();
+        function riskLabel(level) {
+            const labels = {
+                rendah: "Risiko Rendah",
+                sedang: "Risiko Sedang",
+                tinggi: "Risiko Tinggi"
+            };
+            return labels[level] || "Belum Diketahui";
+        }
+
+        function profileLine(profile) {
+            const pieces = [
+                profile?.alamat,
+                profile?.kecamatan,
+                profile?.kota,
+                profile?.provinsi
+            ].filter(Boolean);
+            return pieces.length ? pieces.join(", ") : "Lokasi belum lengkap";
+        }
+
+        function renderHistory() {
+            const list = document.getElementById("historyList");
+            const history = readHistory();
+
+            if (history.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <strong>Belum ada riwayat survey.</strong><br>
+                        Mulai survey untuk menyimpan hasil terakhir di browser.
+                    </div>
+                `;
+                return;
             }
+
+            list.innerHTML = history.slice(0, 6).map((record, index) => {
+                const profile = record.profile || {};
+                const level = record.result?.risk_level || "rendah";
+                return `
+                    <article class="history-item">
+                        <div>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                <span class="risk-badge risk-${level}">
+                                    <i class="fa-solid fa-circle"></i>${riskLabel(level)}
+                                </span>
+                                <span class="history-meta">${formatDate(record.createdAt)}</span>
+                            </div>
+                            <h3>${escapeHtml(profile.nama || "Pengguna")}</h3>
+                            <div class="history-meta">${escapeHtml(profileLine(profile))}</div>
+                        </div>
+                        <button class="btn-small" type="button" data-history-index="${index}">
+                            <i class="fa-solid fa-eye me-2"></i>Lihat Result
+                        </button>
+                    </article>
+                `;
+            }).join("");
+
+            document.querySelectorAll("[data-history-index]").forEach((button) => {
+                button.addEventListener("click", () => {
+                    const record = history[Number(button.dataset.historyIndex)];
+                    localStorage.setItem(LATEST_KEY, JSON.stringify(record));
+                    window.location.href = "/result";
+                });
+            });
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement("div");
+            div.textContent = value ?? "";
+            return div.innerHTML;
+        }
+
+        document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+            if (!confirm("Hapus semua riwayat survey di browser ini?")) return;
+            localStorage.removeItem(HISTORY_KEY);
+            localStorage.removeItem(LATEST_KEY);
+            renderHistory();
         });
+
+        renderHistory();
     </script>
 </body>
 </html>

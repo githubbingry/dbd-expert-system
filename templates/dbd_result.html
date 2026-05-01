@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result Potensi DBD</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #17324d;
+            --muted: #64748b;
+            --line: #d9e4ea;
+            --soft: #f4f9f8;
+            --teal: #0f766e;
+            --teal-dark: #115e59;
+            --blue: #0f4c81;
+            --red: #be123c;
+            --amber: #b7791f;
+            --green: #15803d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--ink);
+            background: #f7fbfb;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+
+        .site-nav {
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: var(--teal);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-link {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .nav-link:hover {
+            color: var(--teal);
+        }
+
+        .result-page {
+            padding: 48px 0 70px;
+        }
+
+        .result-hero,
+        .panel,
+        .empty-state {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        .result-hero {
+            padding: 34px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .result-title {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            line-height: 1.08;
+            letter-spacing: 0;
+            font-weight: 800;
+            margin: 0 0 12px;
+        }
+
+        .result-message {
+            color: var(--muted);
+            line-height: 1.7;
+            margin: 0;
+            max-width: 760px;
+        }
+
+        .risk-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 999px;
+            padding: 9px 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            border: 1px solid transparent;
+        }
+
+        .risk-rendah {
+            color: var(--green);
+            background: #eaf7ed;
+            border-color: #bce3c5;
+        }
+
+        .risk-sedang {
+            color: var(--amber);
+            background: #fff7df;
+            border-color: #f5df9d;
+        }
+
+        .risk-tinggi {
+            color: var(--red);
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+
+        .risk-meter {
+            width: 142px;
+            height: 142px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 10px solid #e2edf0;
+            color: var(--blue);
+            font-size: 2.8rem;
+        }
+
+        .risk-meter.rendah {
+            border-color: #bce3c5;
+            color: var(--green);
+        }
+
+        .risk-meter.sedang {
+            border-color: #f5df9d;
+            color: var(--amber);
+        }
+
+        .risk-meter.tinggi {
+            border-color: #fecdd3;
+            color: var(--red);
+        }
+
+        .panel {
+            padding: 24px;
+            height: 100%;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .panel-title i {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #e4f5f1;
+            color: var(--teal-dark);
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eef4f6;
+        }
+
+        .info-row:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .info-value {
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .intermediate-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            height: 100%;
+            background: #f9fcfc;
+        }
+
+        .intermediate-card span {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .intermediate-card strong {
+            display: block;
+            margin-top: 8px;
+            font-size: 1.25rem;
+            text-transform: capitalize;
+        }
+
+        .suggestion-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .suggestion-item {
+            display: grid;
+            grid-template-columns: 40px 1fr;
+            gap: 14px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .suggestion-item i {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #e4f5f1;
+            color: var(--teal-dark);
+        }
+
+        .suggestion-item h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .suggestion-item p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .btn-health,
+        .btn-outline-health {
+            min-height: 46px;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            text-decoration: none;
+        }
+
+        .btn-health {
+            background: var(--teal);
+            border: 1px solid var(--teal);
+            color: #fff;
+        }
+
+        .btn-health:hover {
+            color: #fff;
+            background: var(--teal-dark);
+            border-color: var(--teal-dark);
+        }
+
+        .btn-outline-health {
+            background: #fff;
+            border: 1px solid #9ab0bd;
+            color: var(--ink);
+        }
+
+        .btn-outline-health:hover {
+            color: var(--teal-dark);
+            border-color: var(--teal);
+        }
+
+        .empty-state {
+            padding: 42px;
+            text-align: center;
+        }
+
+        .empty-state i {
+            color: var(--teal);
+            font-size: 2.2rem;
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            margin-bottom: 22px;
+        }
+
+        @media (max-width: 767px) {
+            .result-hero {
+                grid-template-columns: 1fr;
+            }
+
+            .risk-meter {
+                width: 112px;
+                height: 112px;
+                font-size: 2.2rem;
+            }
+
+            .info-row {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+
+            .btn-health,
+            .btn-outline-health {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <a href="/" class="d-flex align-items-center gap-3 text-decoration-none text-dark">
+                <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-shield-heart"></i></span>
+                <span class="fw-bold">DBD Care</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <a class="nav-link" href="/">Beranda</a>
+                <a class="nav-link" href="/survey">Survey</a>
+                <a class="nav-link" href="/result">Result</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="result-page">
+        <div class="container">
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+                <h1 class="h3 fw-bold">Belum ada result survey</h1>
+                <p>Silakan isi survey terlebih dahulu agar hasil analisis dapat ditampilkan di halaman ini.</p>
+                <a class="btn-health" href="/survey"><i class="fa-solid fa-clipboard-check"></i>Mulai Survey</a>
+            </div>
+
+            <div id="resultContent" style="display: none;">
+                <section class="result-hero">
+                    <div>
+                        <span id="riskChip" class="risk-chip">
+                            <i class="fa-solid fa-circle"></i>
+                            <span id="riskLabel">Risiko</span>
+                        </span>
+                        <h1 class="result-title">Hasil Analisis Potensi DBD</h1>
+                        <p class="result-message" id="riskMessage"></p>
+                    </div>
+                    <div class="risk-meter" id="riskMeter" aria-hidden="true">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </section>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-5">
+                        <section class="panel">
+                            <h2 class="panel-title"><i class="fa-solid fa-location-dot"></i>Data Survey</h2>
+                            <div class="info-grid" id="profileInfo"></div>
+                        </section>
+                    </div>
+                    <div class="col-lg-7">
+                        <section class="panel">
+                            <h2 class="panel-title"><i class="fa-solid fa-chart-simple"></i>Ringkasan Sistem</h2>
+                            <div class="row g-3" id="intermediateGrid"></div>
+                        </section>
+                    </div>
+                </div>
+
+                <section class="panel mb-4">
+                    <h2 class="panel-title"><i class="fa-solid fa-hand-holding-medical"></i>Saran Pencegahan yang Relevan</h2>
+                    <div class="suggestion-list" id="suggestionList"></div>
+                </section>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="/survey" class="btn-health"><i class="fa-solid fa-rotate-right"></i>Survey Ulang</a>
+                    <a href="/" class="btn-outline-health"><i class="fa-solid fa-house"></i>Kembali ke Beranda</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const LATEST_KEY = "dbdLatestResult";
+
+        const riskLabels = {
+            rendah: "Risiko Rendah",
+            sedang: "Risiko Sedang",
+            tinggi: "Risiko Tinggi"
+        };
+
+        const riskMessages = {
+            rendah: "Kondisi lingkungan menunjukkan potensi risiko rendah. Tetap lakukan pemantauan rutin karena kondisi dapat berubah setelah hujan atau aktivitas lingkungan.",
+            sedang: "Kondisi lingkungan menunjukkan potensi risiko sedang. Lakukan pencegahan terarah pada faktor yang masih berisiko agar tidak berkembang menjadi kondisi tinggi.",
+            tinggi: "Kondisi lingkungan menunjukkan potensi risiko tinggi. Prioritaskan pembersihan sumber genangan, pemeriksaan jentik, dan koordinasi warga setempat."
+        };
+
+        const suggestionRules = [
+            {
+                key: "genangan_air_terbuka",
+                values: ["ada"],
+                icon: "fa-droplet-slash",
+                title: "Hilangkan atau tutup genangan air terbuka",
+                text: "Kosongkan genangan yang tidak diperlukan, balikkan wadah kosong, dan tutup rapat tempat penampungan air agar nyamuk tidak bertelur."
+            },
+            {
+                key: "durasi_genangan_air",
+                values: ["3-6 hari", ">=7 hari"],
+                icon: "fa-calendar-check",
+                title: "Percepat pengurasan air yang bertahan lama",
+                text: "Jadwalkan pengurasan dan penyikatan wadah air minimal sekali seminggu, terutama pada genangan yang bertahan lebih dari tiga hari."
+            },
+            {
+                key: "keberadaan_jentik",
+                values: ["jarang", "luas"],
+                icon: "fa-magnifying-glass",
+                title: "Lakukan pemeriksaan jentik berkala",
+                text: "Periksa bak mandi, pot, talang, vas, dispenser, dan wadah lain. Bila jentik luas, koordinasikan dengan kader jumantik atau fasilitas kesehatan setempat."
+            },
+            {
+                key: "nyamuk_aedes",
+                values: ["jarang", "banyak"],
+                icon: "fa-shield-virus",
+                title: "Kurangi paparan gigitan nyamuk",
+                text: "Gunakan repellent sesuai aturan pakai, pasang kasa ventilasi, rapikan pakaian tergantung, dan kurangi area lembap tempat nyamuk beristirahat."
+            },
+            {
+                key: "frekuensi_hujan",
+                values: ["sering"],
+                icon: "fa-cloud-rain",
+                title: "Periksa lingkungan setelah hujan",
+                text: "Lakukan pengecekan wadah luar rumah, talang, halaman, dan barang bekas setelah hujan karena genangan baru sering muncul tanpa disadari."
+            },
+            {
+                key: "intensitas_hujan",
+                values: ["sedang", "deras"],
+                icon: "fa-water",
+                title: "Pastikan saluran air lancar",
+                text: "Bersihkan selokan, talang, dan titik aliran air agar hujan tidak membentuk genangan yang bertahan lama."
+            },
+            {
+                key: "mobilitas_penduduk",
+                values: ["tinggi"],
+                icon: "fa-person-walking-arrow-right",
+                title: "Perkuat edukasi di area ramai",
+                text: "Area dengan banyak orang keluar masuk perlu informasi pencegahan yang terlihat jelas dan pemeriksaan lingkungan yang lebih rutin."
+            },
+            {
+                key: "kepadatan_penduduk",
+                values: ["padat"],
+                icon: "fa-people-roof",
+                title: "Lakukan pencegahan secara serentak",
+                text: "Pada lingkungan padat, pembersihan satu rumah saja sering tidak cukup. Koordinasikan PSN bersama RT, RW, atau pengelola kawasan."
+            },
+            {
+                key: "kondisi_lingkungan_sekitar",
+                values: ["kumuh"],
+                icon: "fa-broom",
+                title: "Bersihkan sampah dan area lembap",
+                text: "Rapikan barang bekas, tutup tempat sampah, dan bersihkan saluran tersumbat agar tidak menjadi tempat air tertahan."
+            }
+        ];
+
+        function readLatest() {
+            try {
+                const raw = localStorage.getItem(LATEST_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement("div");
+            div.textContent = value ?? "";
+            return div.innerHTML;
+        }
+
+        function formatDate(value) {
+            if (!value) return "-";
+            return new Intl.DateTimeFormat("id-ID", {
+                dateStyle: "full",
+                timeStyle: "short"
+            }).format(new Date(value));
+        }
+
+        function titleCaseValue(value) {
+            if (!value) return "Tidak diketahui";
+            return String(value).replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+        }
+
+        function renderProfile(record) {
+            const profile = record.profile || {};
+            const rows = [
+                ["Nama", profile.nama],
+                ["Alamat", profile.alamat],
+                ["Kecamatan", profile.kecamatan],
+                ["Kabupaten/Kota", profile.kota],
+                ["Provinsi", profile.provinsi],
+                ["Tanggal Survey", formatDate(record.createdAt)]
+            ];
+
+            document.getElementById("profileInfo").innerHTML = rows.map(([label, value]) => `
+                <div class="info-row">
+                    <div class="info-label">${label}</div>
+                    <div class="info-value">${escapeHtml(value || "-")}</div>
+                </div>
+            `).join("");
+        }
+
+        function renderIntermediate(result) {
+            const intermediate = result.intermediate_results || {};
+            const items = [
+                ["Potensi Perkembangbiakan", intermediate.potensi_perkembangbiakan],
+                ["Kondisi Iklim", intermediate.kondisi_iklim],
+                ["Faktor Eksposur", intermediate.faktor_eksposur]
+            ];
+
+            document.getElementById("intermediateGrid").innerHTML = items.map(([label, value]) => `
+                <div class="col-md-4">
+                    <div class="intermediate-card">
+                        <span>${label}</span>
+                        <strong>${escapeHtml(titleCaseValue(value))}</strong>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function buildSuggestions(record) {
+            const answers = record.answers || {};
+            const suggestions = suggestionRules.filter((rule) => rule.values.includes(answers[rule.key]));
+            const level = record.result?.risk_level;
+
+            if (level === "tinggi") {
+                suggestions.unshift({
+                    icon: "fa-triangle-exclamation",
+                    title: "Prioritaskan tindakan hari ini",
+                    text: "Karena risiko tinggi, lakukan pembersihan sumber genangan dan koordinasi warga secepatnya. Bila ada warga bergejala demam tinggi, arahkan untuk memeriksa ke fasilitas kesehatan."
+                });
+            } else if (level === "sedang") {
+                suggestions.unshift({
+                    icon: "fa-list-check",
+                    title: "Buat jadwal tindak lanjut",
+                    text: "Karena risiko sedang, ulangi pemeriksaan lingkungan dalam beberapa hari dan pastikan faktor yang berisiko sudah ditangani."
+                });
+            }
+
+            if (suggestions.length === 0) {
+                suggestions.push({
+                    icon: "fa-circle-check",
+                    title: "Pertahankan pemantauan rutin",
+                    text: "Tidak ada faktor berisiko utama dari jawaban saat ini. Tetap lakukan PSN rutin, terutama setelah hujan atau saat ada perubahan kondisi lingkungan."
+                });
+            }
+
+            return suggestions;
+        }
+
+        function renderSuggestions(record) {
+            const suggestions = buildSuggestions(record);
+            document.getElementById("suggestionList").innerHTML = suggestions.map((item) => `
+                <article class="suggestion-item">
+                    <i class="fa-solid ${item.icon}" aria-hidden="true"></i>
+                    <div>
+                        <h3>${escapeHtml(item.title)}</h3>
+                        <p>${escapeHtml(item.text)}</p>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        function renderResult() {
+            const record = readLatest();
+            if (!record || !record.result) {
+                document.getElementById("emptyState").style.display = "block";
+                return;
+            }
+
+            const level = record.result.risk_level || "rendah";
+            const chip = document.getElementById("riskChip");
+            const meter = document.getElementById("riskMeter");
+            chip.className = `risk-chip risk-${level}`;
+            meter.className = `risk-meter ${level}`;
+            document.getElementById("riskLabel").textContent = riskLabels[level] || "Risiko Tidak Diketahui";
+            document.getElementById("riskMessage").textContent = riskMessages[level] || record.result.risk_message || "";
+
+            renderProfile(record);
+            renderIntermediate(record.result);
+            renderSuggestions(record);
+
+            document.getElementById("resultContent").style.display = "block";
+        }
+
+        renderResult();
+    </script>
+</body>
+</html>

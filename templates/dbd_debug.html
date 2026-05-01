@@ -3,816 +3,697 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBD Expert System - Debug Mode (Backward Chaining)</title>
+    <title>Dev Debug - Sistem Pakar DBD</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --info-color: #3498db;
-            --debug-bg: #1e1e1e;
+            --ink: #17324d;
+            --muted: #64748b;
+            --line: #d9e4ea;
+            --soft: #f4f9f8;
+            --teal: #0f766e;
+            --teal-dark: #115e59;
+            --blue: #0f4c81;
+            --red: #be123c;
+            --amber: #b7791f;
+            --green: #15803d;
+            --code-bg: #101828;
+            --code-line: #25344c;
         }
-        
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-            padding: 20px;
+            margin: 0;
+            color: var(--ink);
+            background: #eef6f5;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
         }
-        
-        .container {
-            max-width: 1400px;
+
+        .dev-header {
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+            padding: 22px 0;
         }
-        
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+
+        .dev-title {
+            display: flex;
+            gap: 14px;
+            align-items: center;
         }
-        
-        .card-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 15px 20px;
-            font-weight: bold;
-        }
-        
-        .debug-panel {
-            background: var(--debug-bg);
-            color: #d4d4d4;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            max-height: 600px;
-            overflow-y: auto;
-            border-radius: 10px;
-            padding: 0;
-        }
-        
-        .debug-step {
-            padding: 8px 15px;
-            border-bottom: 1px solid #2d2d2d;
-            transition: all 0.2s;
-        }
-        
-        .debug-step:hover {
-            background: #2d2d2d;
-        }
-        
-        .debug-step-start { border-left: 4px solid #3498db; }
-        .debug-step-goal_attempt { border-left: 4px solid #e74c3c; }
-        .debug-step-goal_found { border-left: 4px solid #27ae60; }
-        .debug-step-goal_fail { border-left: 4px solid #e74c3c; background: rgba(231, 76, 60, 0.1); }
-        .debug-step-rule_attempt { border-left: 4px solid #f39c12; }
-        .debug-step-rule_fire { border-left: 4px solid #27ae60; background: rgba(39, 174, 96, 0.1); }
-        .debug-step-rule_fire_after_subgoals { border-left: 4px solid #27ae60; background: rgba(39, 174, 96, 0.15); }
-        .debug-step-rule_missing { border-left: 4px solid #e67e22; }
-        .debug-step-subgoal { border-left: 4px solid #9b59b6; }
-        .debug-step-subgoal_success { border-left: 4px solid #27ae60; }
-        .debug-step-subgoal_fail { border-left: 4px solid #e74c3c; }
-        .debug-step-fact_input { border-left: 4px solid #3498db; }
-        .debug-step-fact_derived { border-left: 4px solid #27ae60; }
-        .debug-step-conclusion { border-left: 4px solid #e74c3c; background: rgba(231, 76, 60, 0.2); font-weight: bold; }
-        .debug-step-rules_found { border-left: 4px solid #1abc9c; }
-        
-        .badge-depth {
-            background: #34495e;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-right: 10px;
-        }
-        
-        .step-icon {
-            width: 24px;
-            display: inline-block;
-            font-size: 14px;
-            margin-right: 8px;
-        }
-        
-        .step-time {
-            color: #7f8c8d;
-            font-size: 10px;
-            margin-left: 10px;
-        }
-        
-        .fact-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            margin: 4px;
-            background: #ecf0f1;
-            border-radius: 20px;
-            font-size: 12px;
-            font-family: monospace;
-        }
-        
-        .fact-badge.derived {
-            background: #d5f4e6;
-            border-left: 3px solid #27ae60;
-        }
-        
-        .rule-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            margin: 2px;
-            background: #ffeaa7;
-            border-radius: 12px;
-            font-size: 11px;
-            font-family: monospace;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0,0,0,.3);
-            border-radius: 50%;
-            border-top-color: #000;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .bulk-import-toggle {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .bulk-import-toggle:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        .bulk-textarea {
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            background: #f8f9fa;
-        }
-        .parse-feedback {
-            font-size: 12px;
-            margin-top: 5px;
-        }
-        .fact-match-highlight {
-            background-color: #d4edda;
-            transition: background-color 0.5s ease;
-        }
-        .example-paste {
-            font-size: 11px;
-            font-family: monospace;
-            background: #f0f0f0;
-            padding: 8px;
+
+        .dev-mark {
+            width: 44px;
+            height: 44px;
             border-radius: 8px;
-            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--code-bg);
+            color: #fff;
+        }
+
+        .dev-title h1 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .dev-title p {
+            margin: 2px 0 0;
+            color: var(--muted);
+        }
+
+        .dev-page {
+            padding: 28px 0 48px;
+        }
+
+        .dev-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--line);
+            background: #fbfefe;
+        }
+
+        .panel-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .panel-title i {
+            color: var(--teal-dark);
+        }
+
+        .panel-body {
+            padding: 18px;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .scenario-btn,
+        .btn-dev,
+        .btn-outline-dev {
+            border-radius: 8px;
+            min-height: 42px;
+            padding: 9px 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .scenario-btn {
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--ink);
+        }
+
+        .scenario-btn:hover {
+            border-color: var(--teal);
+            color: var(--teal-dark);
+        }
+
+        .btn-dev {
+            border: 1px solid var(--teal);
+            background: var(--teal);
+            color: #fff;
+        }
+
+        .btn-dev:hover {
+            background: var(--teal-dark);
+            border-color: var(--teal-dark);
+            color: #fff;
+        }
+
+        .btn-outline-dev {
+            border: 1px solid #9ab0bd;
+            background: #fff;
+            color: var(--ink);
+        }
+
+        .btn-outline-dev:hover {
+            border-color: var(--teal);
+            color: var(--teal-dark);
+        }
+
+        .form-label {
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .form-select {
+            border-radius: 8px;
+            min-height: 44px;
+            border-color: #bfd0d8;
+        }
+
+        .form-select:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.14);
+        }
+
+        .debug-panel {
+            background: var(--code-bg);
+            color: #d8e2f1;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.86rem;
+            min-height: 520px;
+            max-height: 720px;
+            overflow: auto;
+        }
+
+        .debug-step {
+            display: grid;
+            grid-template-columns: 28px 82px 1fr 54px;
+            gap: 10px;
+            align-items: start;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--code-line);
+            border-left: 4px solid #51617b;
+        }
+
+        .debug-step i {
+            margin-top: 2px;
+            color: #9fb3c8;
+        }
+
+        .debug-step.rule_fire,
+        .debug-step.rule_fire_after_subgoals,
+        .debug-step.rule_fire_after_all_subgoals,
+        .debug-step.fact_derived,
+        .debug-step.goal_found,
+        .debug-step.subgoal_success {
+            border-left-color: var(--green);
+        }
+
+        .debug-step.rule_attempt,
+        .debug-step.rules_found {
+            border-left-color: var(--amber);
+        }
+
+        .debug-step.goal_attempt,
+        .debug-step.subgoal,
+        .debug-step.recheck_rule,
+        .debug-step.continuing_subgoals {
+            border-left-color: #38bdf8;
+        }
+
+        .debug-step.rule_fail,
+        .debug-step.goal_fail,
+        .debug-step.subgoal_fail,
+        .debug-step.no_rules,
+        .debug-step.cycle_detected {
+            border-left-color: var(--red);
+        }
+
+        .debug-depth,
+        .debug-time {
+            color: #9fb3c8;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        .debug-message {
+            word-break: break-word;
+            line-height: 1.55;
+        }
+
+        .result-strip {
+            display: none;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .result-box,
+        .fact-box {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 14px;
+            background: #fbfefe;
+        }
+
+        .result-box span,
+        .fact-box span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .result-box strong,
+        .fact-box strong {
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+
+        .badge-rule {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            border: 1px solid #f5df9d;
+            background: #fff7df;
+            color: var(--amber);
+            font-weight: 800;
+            padding: 6px 10px;
+            margin: 0 6px 6px 0;
+            font-size: 0.82rem;
+        }
+
+        .facts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .fact-box.derived {
+            background: #edf8f6;
+            border-color: #b7e3da;
+        }
+
+        .empty-code {
+            padding: 18px;
+            color: #9fb3c8;
+        }
+
+        @media (max-width: 1199px) {
+            .dev-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .scenario-grid,
+            .result-strip,
+            .facts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .debug-step {
+                grid-template-columns: 24px 1fr;
+            }
+
+            .debug-depth,
+            .debug-time {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="text-center mb-4">
-            <h1 class="text-white">
-                <i class="fas fa-bug"></i> DBD Expert System - Debug Mode
-            </h1>
-            <p class="text-white-50">Backward Chaining Step-by-Step Visualization | Support Natural Language Paste</p>
+    <header class="dev-header">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="dev-title">
+                <span class="dev-mark" aria-hidden="true"><i class="fa-solid fa-code-branch"></i></span>
+                <div>
+                    <h1>Dev Debug Sistem Pakar DBD</h1>
+                    <p>Halaman khusus untuk menguji rule, facts, dan trace backward chaining.</p>
+                </div>
+            </div>
+            <a href="/" class="btn-outline-dev text-decoration-none"><i class="fa-solid fa-house"></i>Beranda</a>
         </div>
-        
-        <div class="row">
-            <div class="col-lg-5">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span><i class="fas fa-clipboard-list"></i> Input Data / Facts</span>
-                        <button class="btn btn-sm btn-outline-light bulk-import-toggle" type="button" id="toggleBulkImportBtn">
-                            <i class="fas fa-file-import"></i> Bulk Paste
-                        </button>
+    </header>
+
+    <main class="dev-page">
+        <div class="container">
+            <div class="dev-grid">
+                <section class="panel">
+                    <div class="panel-head">
+                        <h2 class="panel-title h5"><i class="fa-solid fa-vial"></i>Input Debug</h2>
+                        <span class="text-muted small">{{ rules_count }} rules</span>
                     </div>
-                    <div class="card-body">
-                        <div id="bulkImportSection" style="display: none;" class="mb-4">
-                            <div class="alert alert-info alert-sm py-2">
-                                <i class="fas fa-info-circle"></i> <strong>Tips:</strong> Anda bisa paste dengan atau tanpa spasi, sistem akan otomatis mengenali!<br>
-                                Contoh format (bisa pakai spasi):
-                            </div>
-                            <div class="example-paste">
-                                Genangan air terbuka = ada<br>
-                                Durasi genangan air = 7_hari<br>
-                                Keberadaan jentik = tidak_ada<br>
-                                Nyamuk aedes = banyak<br>
-                                Frekuensi hujan = sering<br>
-                                Intensitas hujan = sedang<br>
-                                Mobilitas penduduk = tinggi<br>
-                                Kepadatan penduduk = padat<br>
-                                Kondisi Lingkungan Sekitar = baik
-                            </div>
-                            <textarea id="bulkFactsInput" rows="6" class="form-control bulk-textarea mt-2" placeholder="Paste facts di sini..."></textarea>
-                            <div class="d-flex gap-2 mt-2">
-                                <button type="button" id="applyBulkBtn" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-arrow-right"></i> Apply Bulk Facts
-                                </button>
-                                <button type="button" id="clearBulkBtn" class="btn btn-sm btn-secondary">
-                                    <i class="fas fa-eraser"></i> Clear
-                                </button>
-                            </div>
-                            <div id="bulkFeedback" class="parse-feedback text-muted"></div>
+                    <div class="panel-body">
+                        <div class="scenario-grid">
+                            <button class="scenario-btn" type="button" data-scenario="rendah">
+                                <i class="fa-solid fa-circle text-success"></i>Rendah
+                            </button>
+                            <button class="scenario-btn" type="button" data-scenario="sedang">
+                                <i class="fa-solid fa-circle text-warning"></i>Sedang
+                            </button>
+                            <button class="scenario-btn" type="button" data-scenario="tinggi">
+                                <i class="fa-solid fa-circle text-danger"></i>Tinggi
+                            </button>
                         </div>
 
-                        <form id="surveyForm">
+                        <form id="debugForm">
                             {% for key, question in questions.items() %}
-                            <div class="mb-3" data-fact-name="{{ key }}">
-                                <label class="form-label fw-bold">
-                                    {{ question.text }}
-                                </label>
+                            <div class="mb-3">
+                                <label class="form-label" for="select_{{ key }}">{{ question.text }}</label>
                                 <select class="form-select" name="{{ key }}" id="select_{{ key }}" required>
-                                    <option value="">-- Pilih Jawaban --</option>
+                                    <option value="">Pilih Jawaban</option>
                                     {% for value, label in question.options.items() %}
                                     <option value="{{ value }}">{{ label }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             {% endfor %}
-                            
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" id="evaluateBtn">
-                                    <i class="fas fa-play"></i> Evaluate with Backward Chaining
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button class="btn-dev" type="submit" id="evaluateBtn">
+                                    <i class="fa-solid fa-play"></i>Jalankan Evaluasi
                                 </button>
-                                <button type="button" class="btn btn-secondary" id="resetBtn">
-                                    <i class="fas fa-undo"></i> Reset Form & Facts
+                                <button class="btn-outline-dev" type="button" id="resetBtn">
+                                    <i class="fa-solid fa-rotate-left"></i>Reset Form
                                 </button>
                             </div>
                         </form>
                     </div>
-                </div>
-                
-                <div class="card" id="factsPanel" style="display: none;">
-                    <div class="card-header">
-                        <i class="fas fa-database"></i> Working Memory (Facts)
-                    </div>
-                    <div class="card-body">
-                        <div id="factsList"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-7">
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-code-branch"></i> Backward Chaining Inference Trace
-                        <button class="btn btn-sm btn-outline-light float-end" id="clearDebugBtn">
-                            <i class="fas fa-trash"></i> Clear
-                        </button>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="debug-panel" id="debugPanel">
-                            <div class="debug-step debug-step-start">
-                                <i class="fas fa-info-circle step-icon"></i>
-                                <span class="badge-depth">Depth 0</span>
-                                <span>Ready for evaluation. Fill in the form and click Evaluate.</span>
+                </section>
+
+                <section>
+                    <div class="panel mb-3">
+                        <div class="panel-head">
+                            <h2 class="panel-title h5"><i class="fa-solid fa-chart-line"></i>Ringkasan Evaluasi</h2>
+                            <button class="btn-outline-dev btn-sm" type="button" id="clearTraceBtn">
+                                <i class="fa-solid fa-trash-can"></i>Bersihkan Trace
+                            </button>
+                        </div>
+                        <div class="panel-body">
+                            <div class="result-strip" id="resultStrip">
+                                <div class="result-box">
+                                    <span>Tingkat Risiko</span>
+                                    <strong id="riskResult">-</strong>
+                                </div>
+                                <div class="result-box">
+                                    <span>Executed Rules</span>
+                                    <strong id="executedCount">0</strong>
+                                </div>
+                                <div class="result-box">
+                                    <span>Total Facts</span>
+                                    <strong id="factCount">0</strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <h3 class="h6 fw-bold">Rule yang Dieksekusi</h3>
+                                <div id="executedRules" class="text-muted small">Belum ada evaluasi.</div>
+                            </div>
+
+                            <div>
+                                <h3 class="h6 fw-bold">Intermediate Results</h3>
+                                <div id="intermediateResults" class="text-muted small">Belum ada evaluasi.</div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="card" id="resultPanel" style="display: none;">
-                    <div class="card-header">
-                        <i class="fas fa-chart-line"></i> Evaluation Result
-                    </div>
-                    <div class="card-body">
-                        <div class="alert" id="resultAlert"></div>
-                        <div class="mt-3">
-                            <h6>Executed Rules:</h6>
-                            <div id="executedRules"></div>
+
+                    <div class="panel mb-3">
+                        <div class="panel-head">
+                            <h2 class="panel-title h5"><i class="fa-solid fa-database"></i>Working Memory</h2>
                         </div>
-                        <div class="mt-3">
-                            <h6>Intermediate Results:</h6>
-                            <div id="intermediateResults"></div>
+                        <div class="panel-body">
+                            <div class="facts-grid" id="factsList">
+                                <div class="text-muted small">Facts akan tampil setelah evaluasi dijalankan.</div>
+                            </div>
                         </div>
                     </div>
-                </div>
+
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h2 class="panel-title h5"><i class="fa-solid fa-terminal"></i>Backward Chaining Trace</h2>
+                        </div>
+                        <div class="debug-panel" id="debugPanel">
+                            <div class="empty-code">Ready. Pilih template atau isi form custom, lalu jalankan evaluasi.</div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    </main>
+
     <script>
-        // Mapping dari nama fakt yang ada di backend (template variables)
         const questionKeys = {{ questions.keys()|list|tojson }};
-        
-        // Mapping alias: dari nama natural (dengan spasi) ke nama backend (tanpa spasi underscore)
-        // Dibuat secara otomatis dari questionKeys
-        const aliasToKey = {};
-        const keyToAlias = {};
-        
-        // Generate mapping: "Genangan air terbuka" -> "genangan_air_terbuka"
-        questionKeys.forEach(key => {
-            // Konversi backend key (snake_case) ke bentuk natural dengan spasi
-            const naturalName = key.replace(/_/g, ' ');
-            // Capitalize first letter of each word for better display
-            const formattedNatural = naturalName.split(' ').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ');
-            
-            aliasToKey[key] = key; // exact match tetap ada
-            aliasToKey[naturalName] = key;
-            aliasToKey[formattedNatural] = key;
-            
-            // Juga tambahkan versi tanpa underscore untuk beberapa variasi
-            aliasToKey[key.replace(/_/g, '')] = key;
-        });
-        
-        // Tambahkan mapping manual untuk nama-nama yang umum digunakan sesuai contoh user
-        const manualMappings = {
-            "Genangan air terbuka": "genangan_air_terbuka",
-            "genangan air terbuka": "genangan_air_terbuka",
-            "Durasi genangan air": "durasi_genangan_air",
-            "durasi genangan air": "durasi_genangan_air",
-            "Keberadaan jentik": "keberadaan_jentik",
-            "keberadaan jentik": "keberadaan_jentik",
-            "Nyamuk aedes": "nyamuk_aedes",
-            "nyamuk aedes": "nyamuk_aedes",
-            "Frekuensi hujan": "frekuensi_hujan",
-            "frekuensi hujan": "frekuensi_hujan",
-            "Intensitas hujan": "intensitas_hujan",
-            "intensitas hujan": "intensitas_hujan",
-            "Mobilitas penduduk": "mobilitas_penduduk",
-            "mobilitas penduduk": "mobilitas_penduduk",
-            "Kepadatan penduduk": "kepadatan_penduduk",
-            "kepadatan penduduk": "kepadatan_penduduk",
-            "Kondisi Lingkungan Sekitar": "kondisi_lingkungan_sekitar",
-            "kondisi lingkungan sekitar": "kondisi_lingkungan_sekitar"
-        };
-        
-        Object.assign(aliasToKey, manualMappings);
-        
-        // Nilai options mapping untuk validasi
-        const questionOptionsMap = {};
+        const optionMap = {};
         {% for key, question in questions.items() %}
-        questionOptionsMap["{{ key }}"] = {{ question.options.keys()|list|tojson }};
+        optionMap["{{ key }}"] = {{ question.options.keys()|list|tojson }};
         {% endfor %}
-        
-        function normalizeFactName(rawName) {
-            // Trim dan hapus spasi berlebih
-            let cleaned = rawName.trim();
-            // Coba cari di alias mapping
-            if (aliasToKey[cleaned]) {
-                return aliasToKey[cleaned];
-            }
-            // Coba lowercase version
-            const lowerVersion = cleaned.toLowerCase();
-            if (aliasToKey[lowerVersion]) {
-                return aliasToKey[lowerVersion];
-            }
-            // Coba tanpa spasi
-            const noSpace = cleaned.replace(/\s+/g, '');
-            if (aliasToKey[noSpace]) {
-                return aliasToKey[noSpace];
-            }
-            // Coba konversi ke snake_case
-            const snakeCase = cleaned.toLowerCase().replace(/\s+/g, '_');
-            if (questionKeys.includes(snakeCase)) {
-                return snakeCase;
-            }
-            // Return original jika tidak ditemukan
-            return cleaned;
-        }
-        
-        function parseAndApplyBulkFacts(bulkText) {
-            const lines = bulkText.split(/\r?\n/);
-            const parsed = [];
-            const errors = [];
-            const appliedFacts = {};
-            
-            for (let line of lines) {
-                line = line.trim();
-                if (line === "") continue;
-                
-                // Mencari pemisah "="
-                let eqIndex = line.indexOf('=');
-                if (eqIndex === -1) {
-                    errors.push(`Baris tidak valid (tidak ada '='): "${line.substring(0, 50)}"`);
-                    continue;
-                }
-                
-                let rawFactName = line.substring(0, eqIndex).trim();
-                let factValue = line.substring(eqIndex + 1).trim();
-                
-                // Normalisasi nama fact
-                let factName = normalizeFactName(rawFactName);
-                
-                // Cek apakah factName ada di questionKeys
-                if (!questionKeys.includes(factName)) {
-                    errors.push(`Fakta tidak dikenal: "${rawFactName}" (dicoba sebagai: ${factName})`);
-                    continue;
-                }
-                
-                // Validasi nilai terhadap pilihan yang tersedia
-                const allowedValues = questionOptionsMap[factName] || [];
-                if (allowedValues.length > 0) {
-                    // Cek nilai exact match
-                    if (!allowedValues.includes(factValue)) {
-                        // Coba case-insensitive match
-                        const matchedValue = allowedValues.find(v => v.toLowerCase() === factValue.toLowerCase());
-                        if (matchedValue) {
-                            factValue = matchedValue;
-                        } else {
-                            errors.push(`Nilai tidak valid untuk '${rawFactName}': "${factValue}". Harus salah satu dari: ${allowedValues.join(', ')}`);
-                            continue;
-                        }
-                    }
-                }
-                
-                parsed.push({ factName, factValue });
-                appliedFacts[factName] = factValue;
-            }
-            
-            return { parsed, errors, appliedFacts };
-        }
-        
-        function applyBulkToForm(parsedFacts) {
-            let anyApplied = false;
-            for (const item of parsedFacts) {
-                const selectEl = document.getElementById(`select_${item.factName}`);
-                if (selectEl) {
-                    selectEl.value = item.factValue;
-                    anyApplied = true;
-                    highlightFactElement(item.factName);
-                }
-            }
-            return anyApplied;
-        }
-        
-        function highlightFactElement(factKey) {
-            const selectEl = document.getElementById(`select_${factKey}`);
-            if (selectEl) {
-                selectEl.classList.add('fact-match-highlight');
-                setTimeout(() => {
-                    selectEl.classList.remove('fact-match-highlight');
-                }, 500);
-            }
-        }
-        
-        function showBulkFeedback(message, isError = false) {
-            const feedbackDiv = document.getElementById('bulkFeedback');
-            feedbackDiv.innerHTML = message;
-            feedbackDiv.className = `parse-feedback ${isError ? 'text-danger' : 'text-success'}`;
-            setTimeout(() => {
-                if (document.getElementById('bulkFeedback').innerHTML === message) {
-                    // keep visible, will be overwritten next action
-                }
-            }, 5000);
-        }
-        
-        function clearBulkArea() {
-            document.getElementById('bulkFactsInput').value = '';
-            document.getElementById('bulkFeedback').innerHTML = '';
-            document.getElementById('bulkFeedback').className = 'parse-feedback text-muted';
-        }
-        
-        // Event: Apply Bulk Facts
-        document.getElementById('applyBulkBtn').addEventListener('click', () => {
-            const bulkText = document.getElementById('bulkFactsInput').value;
-            if (!bulkText.trim()) {
-                showBulkFeedback('Silakan paste fakta terlebih dahulu.', true);
-                return;
-            }
-            
-            const { parsed, errors, appliedFacts } = parseAndApplyBulkFacts(bulkText);
-            
-            if (errors.length > 0) {
-                let errorMsg = `Berhasil memproses ${parsed.length} fakta, namun ada ${errors.length} error:<br>`;
-                errorMsg += errors.slice(0, 5).join('<br>');
-                if (errors.length > 5) errorMsg += `<br>...dan ${errors.length - 5} error lainnya`;
-                showBulkFeedback(errorMsg, true);
-            } else {
-                if (parsed.length === 0) {
-                    showBulkFeedback('Tidak ada fakta yang valid untuk di-apply. Periksa format Anda.', true);
-                    return;
-                }
-                applyBulkToForm(parsed);
-                const appliedNames = parsed.map(p => p.factName.replace(/_/g, ' ')).join(', ');
-                showBulkFeedback(`✓ Berhasil mengisi ${parsed.length} fakta ke form: ${appliedNames}`, false);
-            }
-        });
-        
-        document.getElementById('clearBulkBtn').addEventListener('click', () => {
-            clearBulkArea();
-            showBulkFeedback('Area bulk dibersihkan.', false);
-        });
-        
-        // Toggle bulk import section
-        const toggleBtn = document.getElementById('toggleBulkImportBtn');
-        const bulkSection = document.getElementById('bulkImportSection');
-        toggleBtn.addEventListener('click', () => {
-            if (bulkSection.style.display === 'none') {
-                bulkSection.style.display = 'block';
-                toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Bulk';
-            } else {
-                bulkSection.style.display = 'none';
-                toggleBtn.innerHTML = '<i class="fas fa-file-import"></i> Bulk Paste';
-            }
-        });
 
-        // ============================================
-        // URL Parameter Parser - Load data from query string
-        // ============================================
-
-        function loadAnswersFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const answers = {};
-            let hasAnswers = false;
-            
-            for (const key of questionKeys) {
-                const value = urlParams.get(key);
-                if (value && value !== '') {
-                    answers[key] = value;
-                    hasAnswers = true;
-                }
+        const scenarios = {
+            rendah: {
+                genangan_air_terbuka: "tidak_ada",
+                durasi_genangan_air: "<3 hari",
+                keberadaan_jentik: "tidak_ada",
+                nyamuk_aedes: "tidak_terlihat",
+                frekuensi_hujan: "tidak_pernah",
+                intensitas_hujan: "ringan",
+                mobilitas_penduduk: "rendah",
+                kepadatan_penduduk: "renggang",
+                kondisi_lingkungan_sekitar: "bersih"
+            },
+            sedang: {
+                genangan_air_terbuka: "ada",
+                durasi_genangan_air: "<3 hari",
+                keberadaan_jentik: "luas",
+                nyamuk_aedes: "banyak",
+                frekuensi_hujan: "sering",
+                intensitas_hujan: "ringan",
+                mobilitas_penduduk: "tinggi",
+                kepadatan_penduduk: "renggang",
+                kondisi_lingkungan_sekitar: "bersih"
+            },
+            tinggi: {
+                genangan_air_terbuka: "ada",
+                durasi_genangan_air: ">=7 hari",
+                keberadaan_jentik: "luas",
+                nyamuk_aedes: "banyak",
+                frekuensi_hujan: "sering",
+                intensitas_hujan: "deras",
+                mobilitas_penduduk: "tinggi",
+                kepadatan_penduduk: "padat",
+                kondisi_lingkungan_sekitar: "kumuh"
             }
-            
-            return { answers, hasAnswers };
-        }
-
-        function applyAnswersToForm(answers) {
-            let appliedCount = 0;
-            for (const [key, value] of Object.entries(answers)) {
-                const selectEl = document.getElementById(`select_${key}`);
-                if (selectEl && value) {
-                    selectEl.value = value;
-                    appliedCount++;
-                    highlightFactElement(key);
-                }
-            }
-            return appliedCount;
-        }
-
-        // Auto-evaluate if answers are present in URL
-        async function autoEvaluateIfHasData() {
-            const { answers, hasAnswers } = loadAnswersFromURL();
-            
-            if (hasAnswers) {
-                // Add info to debug panel
-                const panel = document.getElementById('debugPanel');
-                panel.innerHTML = `
-                    <div class="debug-step debug-step-start">
-                        <i class="fas fa-info-circle step-icon"></i>
-                        <span class="badge-depth">System</span>
-                        <span>📥 Data detected from URL parameters. Loading ${Object.keys(answers).length} facts...</span>
-                    </div>
-                `;
-                
-                // Apply to form with slight delay for visual feedback
-                setTimeout(() => {
-                    const appliedCount = applyAnswersToForm(answers);
-                    
-                    // Add to debug panel
-                    panel.innerHTML += `
-                        <div class="debug-step debug-step-start">
-                            <i class="fas fa-check-circle step-icon text-success"></i>
-                            <span class="badge-depth">System</span>
-                            <span>✅ Applied ${appliedCount} facts from URL. Starting evaluation...</span>
-                        </div>
-                    `;
-                    
-                    // Auto-evaluate
-                    setTimeout(() => {
-                        evaluateWithAnswers(answers);
-                    }, 500);
-                }, 300);
-            }
-        }
-
-// Call auto-evaluate when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    autoEvaluateIfHasData();
-});
-        
-        // --- Debug display functions ---
-        const stepIcons = {
-            'start': 'fa-play',
-            'goal_attempt': 'fa-bullseye',
-            'goal_found': 'fa-check-circle',
-            'goal_fail': 'fa-times-circle',
-            'rule_attempt': 'fa-gavel',
-            'rule_fire': 'fa-fire',
-            'rule_fire_after_subgoals': 'fa-check-double',
-            'rule_missing': 'fa-question-circle',
-            'subgoal': 'fa-code-branch',
-            'subgoal_success': 'fa-check',
-            'subgoal_fail': 'fa-times',
-            'fact_input': 'fa-keyboard',
-            'fact_derived': 'fa-magic',
-            'conclusion': 'fa-flag-checkered',
-            'rules_found': 'fa-list'
         };
-        
-        function formatStepMessage(step) {
-            let icon = stepIcons[step.type] || 'fa-circle';
-            let colorClass = '';
-            if (step.type === 'goal_found' || step.type === 'rule_fire' || step.type === 'subgoal_success') {
-                colorClass = 'text-success';
-            } else if (step.type === 'goal_fail' || step.type === 'subgoal_fail') {
-                colorClass = 'text-danger';
-            } else if (step.type === 'rule_attempt') {
-                colorClass = 'text-warning';
-            } else if (step.type === 'conclusion') {
-                colorClass = 'text-info';
+
+        const stepIcons = {
+            start: "fa-play",
+            fact_input: "fa-keyboard",
+            goal_attempt: "fa-bullseye",
+            goal_found: "fa-circle-check",
+            goal_fail: "fa-circle-xmark",
+            rules_found: "fa-list",
+            rule_attempt: "fa-gavel",
+            rule_fire: "fa-fire",
+            rule_fire_after_subgoals: "fa-check-double",
+            rule_fire_after_all_subgoals: "fa-check-double",
+            rule_missing: "fa-circle-question",
+            rule_still_missing: "fa-circle-question",
+            subgoal: "fa-code-branch",
+            subgoal_success: "fa-check",
+            subgoal_fail: "fa-xmark",
+            recheck_rule: "fa-rotate",
+            continuing_subgoals: "fa-forward",
+            fact_derived: "fa-wand-magic-sparkles",
+            conclusion: "fa-flag-checkered",
+            no_rules: "fa-ban",
+            cycle_detected: "fa-triangle-exclamation"
+        };
+
+        function setScenario(level) {
+            const scenario = scenarios[level];
+            for (const [key, value] of Object.entries(scenario)) {
+                const select = document.getElementById(`select_${key}`);
+                if (select) select.value = value;
             }
-            
-            return `
-                <div class="debug-step debug-step-${step.type}">
-                    <i class="fas ${icon} step-icon ${colorClass}"></i>
-                    <span class="badge-depth">Depth ${step.depth}</span>
-                    <span class="${colorClass}">${escapeHtml(step.message)}</span>
-                    <span class="step-time">[#${step.timestamp}]</span>
-                </div>
-            `;
         }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
+
+        function collectAnswers() {
+            const answers = {};
+            for (const key of questionKeys) {
+                const select = document.getElementById(`select_${key}`);
+                if (select && select.value) {
+                    answers[key] = select.value;
+                }
+            }
+            return answers;
+        }
+
+        function validateAnswers(answers) {
+            for (const key of questionKeys) {
+                if (!answers[key]) return false;
+            }
+            return true;
+        }
+
+        function titleCaseValue(value) {
+            if (!value) return "-";
+            return String(value).replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement("div");
+            div.textContent = value ?? "";
             return div.innerHTML;
         }
-        
-        function displayDebugSteps(steps) {
-            const panel = document.getElementById('debugPanel');
-            panel.innerHTML = '';
+
+        function sanitizeDebugMessage(message) {
+            return String(message || "")
+                .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+                .replace(/[^\x20-\x7E]+/g, " ")
+                .replace(/\s{2,}/g, " ")
+                .trim();
+        }
+
+        function renderDebugSteps(steps) {
+            const panel = document.getElementById("debugPanel");
             if (!steps || steps.length === 0) {
-                panel.innerHTML = '<div class="debug-step"><i class="fas fa-info-circle step-icon"></i> No debug steps available.</div>';
+                panel.innerHTML = '<div class="empty-code">Tidak ada trace.</div>';
                 return;
             }
-            steps.forEach(step => {
-                panel.innerHTML += formatStepMessage(step);
-            });
+
+            panel.innerHTML = steps.map((step) => {
+                const icon = stepIcons[step.type] || "fa-circle";
+                const message = sanitizeDebugMessage(step.message);
+                return `
+                    <div class="debug-step ${escapeHtml(step.type)}">
+                        <i class="fa-solid ${icon}" aria-hidden="true"></i>
+                        <span class="debug-depth">Depth ${step.depth}</span>
+                        <span class="debug-message">${escapeHtml(message)}</span>
+                        <span class="debug-time">#${step.timestamp}</span>
+                    </div>
+                `;
+            }).join("");
             panel.scrollTop = panel.scrollHeight;
         }
-        
-        function displayFacts(facts, derivedFactsSet) {
-            const panel = document.getElementById('factsPanel');
-            const factsList = document.getElementById('factsList');
-            if (!facts || Object.keys(facts).length === 0) {
-                panel.style.display = 'none';
-                return;
-            }
-            panel.style.display = 'block';
-            factsList.innerHTML = '';
-            for (const [attr, value] of Object.entries(facts)) {
-                const isDerived = derivedFactsSet && derivedFactsSet[attr];
-                factsList.innerHTML += `
-                    <span class="fact-badge ${isDerived ? 'derived' : ''}">
-                        <i class="fas ${isDerived ? 'fa-magic' : 'fa-user'}"></i>
-                        ${attr.replace(/_/g, ' ')}: ${value}
-                        ${isDerived ? '<small class="text-muted">(derived)</small>' : ''}
-                    </span>
-                `;
-            }
-        }
-        
-        function displayResult(result, derivedFactsSet) {
-            const resultPanel = document.getElementById('resultPanel');
-            const resultAlert = document.getElementById('resultAlert');
-            const executedRulesDiv = document.getElementById('executedRules');
-            const intermediateResultsDiv = document.getElementById('intermediateResults');
-            
-            resultPanel.style.display = 'block';
-            const riskColors = { 'rendah': 'success', 'sedang': 'warning', 'tinggi': 'danger' };
-            const color = riskColors[result.risk_level] || 'info';
-            resultAlert.className = `alert alert-${color}`;
-            resultAlert.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <div class="display-1 me-3">${result.risk_icon || '🦟'}</div>
-                    <div>
-                        <h4 class="alert-heading">${result.risk_message}</h4>
-                        <hr>
-                        <p class="mb-0">
-                            <strong>Tingkat Risiko:</strong> ${result.risk_level.toUpperCase()}<br>
-                            <strong>Status:</strong> ${result.success ? 'Berhasil dievaluasi' : 'Tidak dapat menentukan'}
-                        </p>
-                    </div>
+
+        function renderResult(result, answers) {
+            const strip = document.getElementById("resultStrip");
+            strip.style.display = "grid";
+
+            const rules = result.executed_rules || [];
+            const facts = result.all_facts || {};
+            document.getElementById("riskResult").textContent = titleCaseValue(result.risk_level);
+            document.getElementById("executedCount").textContent = rules.length;
+            document.getElementById("factCount").textContent = Object.keys(facts).length;
+
+            document.getElementById("executedRules").innerHTML = rules.length
+                ? rules.map((id) => `<span class="badge-rule"><i class="fa-solid fa-gavel"></i>Rule ${id}</span>`).join("")
+                : '<span class="text-muted small">Tidak ada rule yang dieksekusi.</span>';
+
+            const intermediate = result.intermediate_results || {};
+            document.getElementById("intermediateResults").innerHTML = `
+                <div class="row g-2">
+                    <div class="col-md-4"><div class="result-box"><span>Potensi Perkembangbiakan</span><strong>${escapeHtml(titleCaseValue(intermediate.potensi_perkembangbiakan))}</strong></div></div>
+                    <div class="col-md-4"><div class="result-box"><span>Kondisi Iklim</span><strong>${escapeHtml(titleCaseValue(intermediate.kondisi_iklim))}</strong></div></div>
+                    <div class="col-md-4"><div class="result-box"><span>Faktor Eksposur</span><strong>${escapeHtml(titleCaseValue(intermediate.faktor_eksposur))}</strong></div></div>
                 </div>
             `;
-            
-            if (result.executed_rules && result.executed_rules.length > 0) {
-                executedRulesDiv.innerHTML = result.executed_rules.map(id => 
-                    `<span class="rule-badge"><i class="fas fa-rule"></i> Rule ${id}</span>`
-                ).join('');
-            } else {
-                executedRulesDiv.innerHTML = '<p class="text-muted">No rules executed</p>';
-            }
-            
-            if (result.intermediate_results) {
-                intermediateResultsDiv.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="border rounded p-2 text-center">
-                                <small class="text-muted">Potensi Perkembangbiakan</small>
-                                <div class="fw-bold">${result.intermediate_results.potensi_perkembangbiakan || '-'}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-2 text-center">
-                                <small class="text-muted">Kondisi Iklim</small>
-                                <div class="fw-bold">${result.intermediate_results.kondisi_iklim || '-'}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-2 text-center">
-                                <small class="text-muted">Faktor Eksposur</small>
-                                <div class="fw-bold">${result.intermediate_results.faktor_eksposur || '-'}</div>
-                            </div>
-                        </div>
+
+            const userInputKeys = new Set(Object.keys(answers));
+            document.getElementById("factsList").innerHTML = Object.entries(facts).map(([key, value]) => {
+                const derived = !userInputKeys.has(key);
+                return `
+                    <div class="fact-box ${derived ? "derived" : ""}">
+                        <span>${derived ? "Derived Fact" : "Input Fact"}</span>
+                        <strong>${escapeHtml(key.replace(/_/g, " "))}: ${escapeHtml(value)}</strong>
                     </div>
                 `;
-            }
+            }).join("");
         }
-        
-        async function evaluateWithAnswers(answers) {
-            const evaluateBtn = document.getElementById('evaluateBtn');
-            const originalText = evaluateBtn.innerHTML;
-            evaluateBtn.innerHTML = '<span class="loading"></span> Evaluating...';
-            evaluateBtn.disabled = true;
-            
+
+        async function evaluate(answers) {
+            const button = document.getElementById("evaluateBtn");
+            const original = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengevaluasi';
+
             try {
-                const response = await fetch('/api/evaluate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ answers: answers })
+                const response = await fetch("/api/evaluate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ answers })
                 });
-                const data = await response.json();
-                if (data.error) {
-                    alert('Error: ' + data.error);
-                } else {
-                    const derivedSet = {};
-                    if (data.all_facts) {
-                        const userInputs = Object.keys(answers);
-                        for (const [fact, value] of Object.entries(data.all_facts)) {
-                            if (!userInputs.includes(fact)) derivedSet[fact] = true;
-                        }
-                    }
-                    window.currentDerivedFacts = derivedSet;
-                    displayDebugSteps(data.debug_steps);
-                    displayFacts(data.all_facts, derivedSet);
-                    displayResult(data, derivedSet);
+                const result = await response.json();
+                if (!response.ok || result.error) {
+                    throw new Error(result.error || "Evaluasi gagal.");
                 }
+
+                renderResult(result, answers);
+                renderDebugSteps(result.debug_steps);
             } catch (error) {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan: ' + error.message);
+                alert(error.message);
             } finally {
-                evaluateBtn.innerHTML = originalText;
-                evaluateBtn.disabled = false;
+                button.disabled = false;
+                button.innerHTML = original;
             }
         }
-        
-        document.getElementById('surveyForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
+
+        function loadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
             const answers = {};
-            formData.forEach((value, key) => {
-                if (value && value.trim() !== "") answers[key] = value;
-            });
-            
-            let allAnswered = true;
-            for (const q of questionKeys) {
-                if (!answers[q]) {
-                    allAnswered = false;
-                    break;
+            for (const key of questionKeys) {
+                const value = params.get(key);
+                if (value && optionMap[key]?.includes(value)) {
+                    answers[key] = value;
+                    document.getElementById(`select_${key}`).value = value;
                 }
             }
-            if (!allAnswered) {
-                alert('Mohon lengkapi semua pertanyaan! (atau gunakan Bulk Paste untuk mengisi semua fakta)');
+            if (validateAnswers(answers)) {
+                evaluate(answers);
+            }
+        }
+
+        document.querySelectorAll("[data-scenario]").forEach((button) => {
+            button.addEventListener("click", () => {
+                setScenario(button.dataset.scenario);
+            });
+        });
+
+        document.getElementById("debugForm").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const answers = collectAnswers();
+            if (!validateAnswers(answers)) {
+                alert("Lengkapi semua input debug terlebih dahulu.");
                 return;
             }
-            await evaluateWithAnswers(answers);
+            evaluate(answers);
         });
-        
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            document.getElementById('surveyForm').reset();
-            for (let key of questionKeys) {
-                const sel = document.getElementById(`select_${key}`);
-                if (sel) sel.value = "";
-            }
-            clearBulkArea();
-            document.getElementById('debugPanel').innerHTML = `
-                <div class="debug-step debug-step-start">
-                    <i class="fas fa-info-circle step-icon"></i>
-                    <span class="badge-depth">Depth 0</span>
-                    <span>Ready for evaluation. Fill in the form or paste facts and click Evaluate.</span>
-                </div>
-            `;
-            document.getElementById('factsPanel').style.display = 'none';
-            document.getElementById('resultPanel').style.display = 'none';
-            window.currentDerivedFacts = {};
+
+        document.getElementById("resetBtn").addEventListener("click", () => {
+            document.getElementById("debugForm").reset();
+            document.getElementById("resultStrip").style.display = "none";
+            document.getElementById("executedRules").textContent = "Belum ada evaluasi.";
+            document.getElementById("intermediateResults").textContent = "Belum ada evaluasi.";
+            document.getElementById("factsList").innerHTML = '<div class="text-muted small">Facts akan tampil setelah evaluasi dijalankan.</div>';
+            document.getElementById("debugPanel").innerHTML = '<div class="empty-code">Ready. Pilih template atau isi form custom, lalu jalankan evaluasi.</div>';
         });
-        
-        document.getElementById('clearDebugBtn').addEventListener('click', () => {
-            document.getElementById('debugPanel').innerHTML = `
-                <div class="debug-step debug-step-start">
-                    <i class="fas fa-info-circle step-icon"></i>
-                    <span class="badge-depth">Depth 0</span>
-                    <span>Debug panel cleared.</span>
-                </div>
-            `;
+
+        document.getElementById("clearTraceBtn").addEventListener("click", () => {
+            document.getElementById("debugPanel").innerHTML = '<div class="empty-code">Trace dibersihkan.</div>';
         });
+
+        loadFromUrl();
     </script>
 </body>
 </html>
