@@ -1,0 +1,562 @@
+{
+  "rules": [
+    {
+      "id": 1,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "rendah"},
+        {"attr": "iklim", "value": "mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "rentan"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "sedang"},
+      "description": "potensi_perkembangbiakan=rendah AND iklim=mendukung AND faktor_eksposur_manusia=rentan -> tingkat_resiko_dbd=sedang"
+    },
+    {
+      "id": 2,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "rendah"},
+        {"attr": "iklim", "value": "mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "aman"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "rendah"},
+      "description": "potensi_perkembangbiakan=rendah AND iklim=mendukung AND faktor_eksposur_manusia=aman -> tingkat_resiko_dbd=rendah"
+    },
+    {
+      "id": 3,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "rendah"},
+        {"attr": "iklim", "value": "kurang_mendukung", "operator": "or"},
+        {"attr": "iklim", "value": "tidak_mendukung", "operator": "or"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "rendah"},
+      "description": "potensi_perkembangbiakan=rendah AND (iklim=kurang_mendukung OR iklim=tidak_mendukung) -> tingkat_resiko_dbd=rendah"
+    },
+    {
+      "id": 4,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "sedang"},
+        {"attr": "iklim", "value": "mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "rentan"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "tinggi"},
+      "description": "potensi_perkembangbiakan=sedang AND iklim=mendukung AND faktor_eksposur_manusia=rentan -> tingkat_resiko_dbd=tinggi"
+    },
+    {
+      "id": 5,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "sedang"},
+        {"attr": "iklim", "value": "mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "aman"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "sedang"},
+      "description": "potensi_perkembangbiakan=sedang AND iklim=mendukung AND faktor_eksposur_manusia=aman -> tingkat_resiko_dbd=sedang"
+    },
+    {
+      "id": 6,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "sedang"},
+        {"attr": "iklim", "value": "kurang_mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "rentan"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "sedang"},
+      "description": "potensi_perkembangbiakan=sedang AND iklim=kurang_mendukung AND faktor_eksposur_manusia=rentan -> tingkat_resiko_dbd=sedang"
+    },
+    {
+      "id": 7,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "sedang"},
+        {"attr": "iklim", "value": "kurang_mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "aman"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "rendah"},
+      "description": "potensi_perkembangbiakan=sedang AND iklim=kurang_mendukung AND faktor_eksposur_manusia=aman -> tingkat_resiko_dbd=rendah"
+    },
+    {
+      "id": 8,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "sedang"},
+        {"attr": "iklim", "value": "tidak_mendukung"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "rendah"},
+      "description": "potensi_perkembangbiakan=sedang AND iklim=tidak_mendukung -> tingkat_resiko_dbd=rendah"
+    },
+    {
+      "id": 9,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "tinggi"},
+        {"attr": "iklim", "value": "mendukung"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "tinggi"},
+      "description": "potensi_perkembangbiakan=tinggi AND iklim=mendukung -> tingkat_resiko_dbd=tinggi"
+    },
+    {
+      "id": 10,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "tinggi"},
+        {"attr": "iklim", "value": "kurang_mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "rentan"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "tinggi"},
+      "description": "potensi_perkembangbiakan=tinggi AND iklim=kurang_mendukung AND faktor_eksposur_manusia=rentan -> tingkat_resiko_dbd=tinggi"
+    },
+    {
+      "id": 11,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "tinggi"},
+        {"attr": "iklim", "value": "kurang_mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "aman"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "sedang"},
+      "description": "potensi_perkembangbiakan=tinggi AND iklim=kurang_mendukung AND faktor_eksposur_manusia=aman -> tingkat_resiko_dbd=sedang"
+    },
+    {
+      "id": 12,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "tinggi"},
+        {"attr": "iklim", "value": "tidak_mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "rentan"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "sedang"},
+      "description": "potensi_perkembangbiakan=tinggi AND iklim=tidak_mendukung AND faktor_eksposur_manusia=rentan -> tingkat_resiko_dbd=sedang"
+    },
+    {
+      "id": 13,
+      "set": 1,
+      "antecedents": [
+        {"attr": "potensi_perkembangbiakan", "value": "tinggi"},
+        {"attr": "iklim", "value": "tidak_mendukung"},
+        {"attr": "faktor_eksposur_manusia", "value": "aman"}
+      ],
+      "consequent": {"tingkat_resiko_dbd": "rendah"},
+      "description": "potensi_perkembangbiakan=tinggi AND iklim=tidak_mendukung AND faktor_eksposur_manusia=aman -> tingkat_resiko_dbd=rendah"
+    },
+    {
+      "id": 14,
+      "set": 2,
+      "antecedents": [
+        {"attr": "durasi_genangan_air", "value": "<3 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "banyak", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "durasi_genangan_air<3 AND keberadaan_jentik=luas AND (nyamuk_aedes=banyak OR nyamuk_aedes=jarang) -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 15,
+      "set": 2,
+      "antecedents": [
+        {"attr": "durasi_genangan_air", "value": "<3 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "durasi_genangan_air<3 AND keberadaan_jentik=luas AND nyamuk_aedes=tidak_terlihat -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 16,
+      "set": 2,
+      "antecedents": [
+        {"attr": "durasi_genangan_air", "value": "<3 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "banyak"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "durasi_genangan_air<3 AND keberadaan_jentik=jarang AND nyamuk_aedes=banyak -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 17,
+      "set": 2,
+      "antecedents": [
+        {"attr": "durasi_genangan_air", "value": "<3 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "durasi_genangan_air<3 AND keberadaan_jentik=jarang AND (nyamuk_aedes=jarang OR nyamuk_aedes=tidak_terlihat) -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 18,
+      "set": 2,
+      "antecedents": [
+        {"attr": "durasi_genangan_air", "value": "<3 hari"},
+        {"attr": "keberadaan_jentik", "value": "tidak_ada"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "durasi_genangan_air<3 AND keberadaan_jentik=tidak_ada -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 19,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "banyak", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "tinggi"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=luas AND (nyamuk_aedes=banyak OR jarang) -> potensi_perkembangbiakan=tinggi"
+    },
+    {
+      "id": 20,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=luas AND nyamuk_aedes=tidak_terlihat -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 21,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "banyak"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "tinggi"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=jarang AND nyamuk_aedes=banyak -> potensi_perkembangbiakan=tinggi"
+    },
+    {
+      "id": 22,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=jarang AND (nyamuk_aedes=jarang OR tidak_terlihat) -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 23,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "tidak_ada"},
+        {"attr": "nyamuk_aedes", "value": "banyak"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=tidak_ada AND nyamuk_aedes=banyak -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 24,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "tidak_ada"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=tidak_ada AND (nyamuk_aedes=jarang OR tidak_terlihat) -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 25,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "tinggi"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air>=7 AND keberadaan_jentik=luas -> potensi_perkembangbiakan=tinggi"
+    },
+    {
+      "id": 26,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "banyak", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "tinggi"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air>=7 AND keberadaan_jentik=jarang AND (nyamuk_aedes=banyak OR jarang) -> potensi_perkembangbiakan=tinggi"
+    },
+    {
+      "id": 27,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air>=7 AND keberadaan_jentik=jarang AND nyamuk_aedes=tidak_terlihat -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 28,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "tidak_ada"},
+        {"attr": "nyamuk_aedes", "value": "banyak", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air>=7 AND keberadaan_jentik=tidak_ada AND (nyamuk_aedes=banyak OR jarang) -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 29,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "tidak_ada"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=ada AND durasi_genangan_air>=7 AND keberadaan_jentik=tidak_ada AND nyamuk_aedes=tidak_terlihat -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 30,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "banyak", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=luas AND (nyamuk_aedes=banyak OR jarang) -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 31,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=luas AND nyamuk_aedes=tidak_terlihat -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 32,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "banyak"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=jarang AND nyamuk_aedes=banyak -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 33,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=jarang AND (nyamuk_aedes=jarang OR tidak_terlihat) -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 34,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": "3-6 hari"},
+        {"attr": "keberadaan_jentik", "value": "tidak_ada"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air=3-6 AND keberadaan_jentik=tidak_ada -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 35,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "banyak", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air>=7 AND keberadaan_jentik=luas AND (nyamuk_aedes=banyak OR jarang) -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 36,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "luas"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air>=7 AND keberadaan_jentik=luas AND nyamuk_aedes=tidak_terlihat -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 37,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "banyak"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "sedang"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air>=7 AND keberadaan_jentik=jarang AND nyamuk_aedes=banyak -> potensi_perkembangbiakan=sedang"
+    },
+    {
+      "id": 38,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "jarang"},
+        {"attr": "nyamuk_aedes", "value": "jarang", "operator": "or"},
+        {"attr": "nyamuk_aedes", "value": "tidak_terlihat", "operator": "or"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air>=7 AND keberadaan_jentik=jarang AND (nyamuk_aedes=jarang OR tidak_terlihat) -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 39,
+      "set": 2,
+      "antecedents": [
+        {"attr": "genangan_air_terbuka", "value": "tidak_ada"},
+        {"attr": "durasi_genangan_air", "value": ">=7 hari"},
+        {"attr": "keberadaan_jentik", "value": "tidak_ada"}
+      ],
+      "consequent": {"potensi_perkembangbiakan": "rendah"},
+      "description": "genangan_air_terbuka=tidak_ada AND durasi_genangan_air>=7 AND keberadaan_jentik=tidak_ada -> potensi_perkembangbiakan=rendah"
+    },
+    {
+      "id": 40,
+      "set": 3,
+      "antecedents": [
+        {"attr": "frekuensi_hujan", "value": "sering"},
+        {"attr": "intensitas_hujan", "value": "ringan", "operator": "or"},
+        {"attr": "intensitas_hujan", "value": "sedang", "operator": "or"}
+      ],
+      "consequent": {"iklim": "mendukung"},
+      "description": "frekuensi_hujan=sering AND (intensitas_hujan=ringan OR intensitas_hujan=sedang) -> iklim=mendukung"
+    },
+    {
+      "id": 41,
+      "set": 3,
+      "antecedents": [
+        {"attr": "frekuensi_hujan", "value": "sering"},
+        {"attr": "intensitas_hujan", "value": "deras"}
+      ],
+      "consequent": {"iklim": "kurang_mendukung"},
+      "description": "frekuensi_hujan=sering AND intensitas_hujan=deras -> iklim=kurang_mendukung"
+    },
+    {
+      "id": 42,
+      "set": 3,
+      "antecedents": [
+        {"attr": "frekuensi_hujan", "value": "jarang"},
+        {"attr": "intensitas_hujan", "value": "ringan", "operator": "or"},
+        {"attr": "intensitas_hujan", "value": "sedang", "operator": "or"}
+      ],
+      "consequent": {"iklim": "kurang_mendukung"},
+      "description": "frekuensi_hujan=jarang AND (intensitas_hujan=ringan OR intensitas_hujan=sedang) -> iklim=kurang_mendukung"
+    },
+    {
+      "id": 43,
+      "set": 3,
+      "antecedents": [
+        {"attr": "frekuensi_hujan", "value": "jarang"},
+        {"attr": "intensitas_hujan", "value": "deras"}
+      ],
+      "consequent": {"iklim": "mendukung"},
+      "description": "frekuensi_hujan=jarang AND intensitas_hujan=deras -> iklim=mendukung"
+    },
+    {
+      "id": 44,
+      "set": 3,
+      "antecedents": [
+        {"attr": "frekuensi_hujan", "value": "tidak_pernah"}
+      ],
+      "consequent": {"iklim": "tidak_mendukung"},
+      "description": "frekuensi_hujan=tidak_pernah -> iklim=tidak_mendukung"
+    },
+    {
+      "id": 45,
+      "set": 4,
+      "antecedents": [
+        {"attr": "mobilitas_penduduk", "value": "tinggi"},
+        {"attr": "kepadatan_penduduk", "value": "padat"}
+      ],
+      "consequent": {"faktor_eksposur_manusia": "rentan"},
+      "description": "mobilitas_penduduk=tinggi AND kepadatan_penduduk=padat -> faktor_eksposur_manusia=rentan"
+    },
+    {
+      "id": 46,
+      "set": 4,
+      "antecedents": [
+        {"attr": "mobilitas_penduduk", "value": "tinggi"},
+        {"attr": "kepadatan_penduduk", "value": "renggang"},
+        {"attr": "kondisi_lingkungan_sekitar", "value": "kumuh"}
+      ],
+      "consequent": {"faktor_eksposur_manusia": "rentan"},
+      "description": "mobilitas_penduduk=tinggi AND kepadatan_penduduk=renggang AND kondisi_lingkungan_sekitar=kumuh -> faktor_eksposur_manusia=rentan"
+    },
+    {
+      "id": 47,
+      "set": 4,
+      "antecedents": [
+        {"attr": "mobilitas_penduduk", "value": "tinggi"},
+        {"attr": "kepadatan_penduduk", "value": "renggang"},
+        {"attr": "kondisi_lingkungan_sekitar", "value": "bersih"}
+      ],
+      "consequent": {"faktor_eksposur_manusia": "aman"},
+      "description": "mobilitas_penduduk=tinggi AND kepadatan_penduduk=renggang AND kondisi_lingkungan_sekitar=bersih -> faktor_eksposur_manusia=aman"
+    },
+    {
+      "id": 48,
+      "set": 4,
+      "antecedents": [
+        {"attr": "mobilitas_penduduk", "value": "rendah"},
+        {"attr": "kondisi_lingkungan_sekitar", "value": "kumuh"}
+      ],
+      "consequent": {"faktor_eksposur_manusia": "rentan"},
+      "description": "mobilitas_penduduk=rendah AND kondisi_lingkungan_sekitar=kumuh -> faktor_eksposur_manusia=rentan"
+    },
+    {
+      "id": 49,
+      "set": 4,
+      "antecedents": [
+        {"attr": "mobilitas_penduduk", "value": "rendah"},
+        {"attr": "kondisi_lingkungan_sekitar", "value": "bersih"}
+      ],
+      "consequent": {"faktor_eksposur_manusia": "aman"},
+      "description": "mobilitas_penduduk=rendah AND kondisi_lingkungan_sekitar=bersih -> faktor_eksposur_manusia=aman"
+    }
+  ]
+}

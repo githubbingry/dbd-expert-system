@@ -1,0 +1,252 @@
+<!-- templates/dbd_index.html - Landing Page -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pakar DBD - Analisis Risiko Demam Berdarah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+        }
+        .hero-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px;
+            padding: 3rem;
+            margin-top: 3rem;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .btn-backward {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border: none;
+            padding: 14px 40px;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        .btn-backward:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .btn-debug {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 14px 40px;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        .btn-debug:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .expert-badge {
+            background: #dc3545;
+            color: white;
+            padding: 5px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .feature-box {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            height: 100%;
+            transition: all 0.3s;
+        }
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .backward-icon {
+            font-size: 2.5rem;
+        }
+        .demo-inputs {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .btn-demo {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 3px;
+        }
+        .btn-demo:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-card">
+            <div class="text-center mb-4">
+                <span class="expert-badge">🦟 SISTEM PAKAR BACKWARD CHAINING</span>
+                <h1 class="display-4 mt-3">Analisis Risiko DBD</h1>
+                <p class="lead">Sistem pakar dengan metode <strong>Backward Chaining</strong> untuk menganalisis risiko Demam Berdarah Dengue</p>
+            </div>
+
+            <div class="row mt-5 g-4">
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <div class="backward-icon">🎯</div>
+                        <h5>Goal-Driven Reasoning</h5>
+                        <p class="small text-muted">Sistem memulai dari hipotesis (goal) dan bekerja mundur mencari fakta yang mendukung</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <div class="backward-icon">📋</div>
+                        <h5>49 Rule Based</h5>
+                        <p class="small text-muted">Knowledge base dengan 49 aturan yang mencakup 4 set: potensi, iklim, eksposur, dan risiko</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <div class="backward-icon">🔍</div>
+                        <h5>Explanation Facility</h5>
+                        <p class="small text-muted">Sistem dapat menjelaskan alur penalaran backward chaining yang digunakan</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Scenario Inputs -->
+            <div class="demo-inputs">
+                <h5 class="text-center mb-3"><i class="fas fa-flask"></i> Coba dengan Skenario Demo</h5>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <button class="btn-demo w-100" onclick="setDemoScenario('rendah')">
+                            🟢 Skenario Risiko Rendah
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn-demo w-100" onclick="setDemoScenario('sedang')">
+                            🟡 Skenario Risiko Sedang
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn-demo w-100" onclick="setDemoScenario('tinggi')">
+                            🔴 Skenario Risiko Tinggi
+                        </button>
+                    </div>
+                </div>
+                <div id="demoFeedback" class="text-center small text-muted mt-2"></div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="/survey" class="btn btn-backward text-white">
+                    🚀 Mulai Analisis Risiko DBD
+                </a>
+                <button onclick="goToDebugWithData()" class="btn btn-debug text-white ms-3" id="debugBtn">
+                    🔍 Buka Debug Mode
+                </button>
+                <a href="/explanation" class="btn btn-outline-secondary ms-3">
+                    📖 Cara Kerja Backward Chaining
+                </a>
+            </div>
+
+            <div class="mt-5 pt-4 text-center text-muted small">
+                <p>🔬 Berdasarkan 49 aturan pakar | Metode: Backward Chaining | Domain: Kesehatan Masyarakat</p>
+                <p class="mb-0">Variabel input: genangan air, durasi, jentik, nyamuk, hujan, mobilitas, kepadatan, lingkungan</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store current demo answers
+        let currentDemoAnswers = null;
+
+        // Demo scenarios data
+        const demoScenarios = {
+            'rendah': {
+                'genangan_air_terbuka': 'tidak_ada',
+                'durasi_genangan_air': '',
+                'keberadaan_jentik': 'tidak_ada',
+                'nyamuk_aedes': 'tidak_terlihat',
+                'frekuensi_hujan': 'jarang',
+                'intensitas_hujan': 'ringan',
+                'mobilitas_penduduk': 'rendah',
+                'kepadatan_penduduk': 'renggang',
+                'kondisi_lingkungan_sekitar': 'bersih'
+            },
+            'sedang': {
+                'genangan_air_terbuka': 'ada',
+                'durasi_genangan_air': '3-6 hari',
+                'keberadaan_jentik': 'jarang',
+                'nyamuk_aedes': 'jarang',
+                'frekuensi_hujan': 'jarang',
+                'intensitas_hujan': 'sedang',
+                'mobilitas_penduduk': 'rendah',
+                'kepadatan_penduduk': 'padat',
+                'kondisi_lingkungan_sekitar': 'bersih'
+            },
+            'tinggi': {
+                'genangan_air_terbuka': 'ada',
+                'durasi_genangan_air': '>=7 hari',
+                'keberadaan_jentik': 'luas',
+                'nyamuk_aedes': 'banyak',
+                'frekuensi_hujan': 'sering',
+                'intensitas_hujan': 'deras',
+                'mobilitas_penduduk': 'tinggi',
+                'kepadatan_penduduk': 'padat',
+                'kondisi_lingkungan_sekitar': 'kumuh'
+            }
+        };
+
+        function setDemoScenario(level) {
+            currentDemoAnswers = demoScenarios[level];
+            const feedback = document.getElementById('demoFeedback');
+            feedback.innerHTML = `✅ Skenario ${level === 'rendah' ? 'Risiko Rendah' : level === 'sedang' ? 'Risiko Sedang' : 'Risiko Tinggi'} telah dipilih. Klik "Buka Debug Mode" untuk melihat analisis.`;
+            feedback.style.color = level === 'rendah' ? '#27ae60' : level === 'sedang' ? '#f39c12' : '#e74c3c';
+            
+            // Enable debug button with highlight effect
+            const debugBtn = document.getElementById('debugBtn');
+            debugBtn.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                debugBtn.style.transform = '';
+            }, 500);
+        }
+
+        function goToDebugWithData() {
+            let answers = currentDemoAnswers;
+            
+            if (!answers) {
+                // Jika tidak ada skenario yang dipilih, tanyakan apakah ingin menggunakan default
+                if (confirm('Belum ada skenario yang dipilih. Gunakan data default (Risiko Sedang)?')) {
+                    answers = demoScenarios['sedang'];
+                } else {
+                    return;
+                }
+            }
+            
+            // Encode answers to URL parameters
+            const params = new URLSearchParams();
+            for (const [key, value] of Object.entries(answers)) {
+                if (value && value !== '') {
+                    params.append(key, value);
+                }
+            }
+            
+            // Redirect to debug page with parameters
+            window.location.href = `/debug?${params.toString()}`;
+        }
+
+        // Optional: Add keyboard shortcut (Ctrl+D) to open debug
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'd') {
+                e.preventDefault();
+                goToDebugWithData();
+            }
+        });
+    </script>
+</body>
+</html>
