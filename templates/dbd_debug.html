@@ -224,7 +224,8 @@
         .debug-step.goal_attempt,
         .debug-step.subgoal,
         .debug-step.recheck_rule,
-        .debug-step.continuing_subgoals {
+        .debug-step.continuing_subgoals,
+        .debug-step.intermediate_goal {
             border-left-color: #38bdf8;
         }
 
@@ -297,6 +298,44 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
+        }
+
+        .cf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .cf-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 12px;
+            background: #fbfefe;
+        }
+
+        .cf-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .cf-card strong {
+            font-weight: 800;
+            font-size: 0.98rem;
+        }
+
+        .cf-table th {
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .cf-table td,
+        .cf-table th {
+            vertical-align: middle;
         }
 
         .fact-box.derived {
@@ -435,6 +474,38 @@
 
                     <div class="panel mb-3">
                         <div class="panel-head">
+                            <h2 class="panel-title h5"><i class="fa-solid fa-calculator"></i>Debug Certainty Factor</h2>
+                            <span class="text-muted small">Trace CF</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="cf-grid" id="cfSummary">
+                                <div class="text-muted small">Belum ada perhitungan CF.</div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm cf-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Rule</th>
+                                            <th>Konsekuen</th>
+                                            <th>Premise</th>
+                                            <th>Rule CF</th>
+                                            <th>Hasil</th>
+                                            <th>Kombinasi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cfTraceBody">
+                                        <tr>
+                                            <td colspan="7" class="text-muted small">Belum ada rule yang menghasilkan CF.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel mb-3">
+                        <div class="panel-head">
                             <h2 class="panel-title h5"><i class="fa-solid fa-database"></i>Working Memory</h2>
                         </div>
                         <div class="panel-body">
@@ -520,6 +591,7 @@
             continuing_subgoals: "fa-forward",
             fact_derived: "fa-wand-magic-sparkles",
             conclusion: "fa-flag-checkered",
+            intermediate_goal: "fa-diagram-project",
             no_rules: "fa-ban",
             cycle_detected: "fa-triangle-exclamation"
         };
@@ -559,6 +631,12 @@
             const div = document.createElement("div");
             div.textContent = value ?? "";
             return div.innerHTML;
+        }
+
+        function formatPercent(value, isPercent = false) {
+            if (typeof value !== "number" || Number.isNaN(value)) return "-";
+            const percent = isPercent ? value : value * 100;
+            return `${Math.round(percent * 100) / 100}%`;
         }
 
         function sanitizeDebugMessage(message) {
@@ -625,6 +703,49 @@
                     </div>
                 `;
             }).join("");
+
+            renderCfTrace(result.cf);
+        }
+
+        function renderCfTrace(cf) {
+            const summary = document.getElementById("cfSummary");
+            const body = document.getElementById("cfTraceBody");
+
+            if (!cf) {
+                summary.innerHTML = '<div class="text-muted small">Belum ada perhitungan CF.</div>';
+                body.innerHTML = '<tr><td colspan="7" class="text-muted small">Belum ada rule yang menghasilkan CF.</td></tr>';
+                return;
+            }
+
+            const intermediate = cf.intermediate_cf || {};
+            const summaryItems = [
+                ["CF Risiko", formatPercent(cf.risk_percent, true)],
+                ["Threshold", formatPercent(cf.threshold)],
+                ["CF Potensi", formatPercent(intermediate.potensi_perkembangbiakan)],
+                ["CF Iklim", formatPercent(intermediate.kondisi_iklim)],
+                ["CF Eksposur", formatPercent(intermediate.faktor_eksposur)]
+            ];
+
+            summary.innerHTML = summaryItems.map(([label, value]) => `
+                <div class="cf-card">
+                    <span>${escapeHtml(label)}</span>
+                    <strong>${escapeHtml(value)}</strong>
+                </div>
+            `).join("");
+
+            const rows = (cf.fired_rules || []).map((row, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>R${row.rule_id}</td>
+                    <td>${escapeHtml(row.attribute)}=${escapeHtml(row.value)}</td>
+                    <td>${formatPercent(row.premise_cf)}</td>
+                    <td>${formatPercent(row.rule_cf)}</td>
+                    <td>${formatPercent(row.produced_cf)}</td>
+                    <td>${formatPercent(row.combined_cf)}</td>
+                </tr>
+            `).join("");
+
+            body.innerHTML = rows || '<tr><td colspan="7" class="text-muted small">Belum ada rule yang menghasilkan CF.</td></tr>';
         }
 
         async function evaluate(answers) {
@@ -692,6 +813,8 @@
             document.getElementById("intermediateResults").textContent = "Belum ada evaluasi.";
             document.getElementById("factsList").innerHTML = '<div class="text-muted small">Facts akan tampil setelah evaluasi dijalankan.</div>';
             document.getElementById("debugPanel").innerHTML = '<div class="empty-code">Ready. Pilih template atau isi form custom, lalu jalankan evaluasi.</div>';
+            document.getElementById("cfSummary").innerHTML = '<div class="text-muted small">Belum ada perhitungan CF.</div>';
+            document.getElementById("cfTraceBody").innerHTML = '<tr><td colspan="7" class="text-muted small">Belum ada rule yang menghasilkan CF.</td></tr>';
         });
 
         document.getElementById("clearTraceBtn").addEventListener("click", () => {

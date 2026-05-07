@@ -227,77 +227,81 @@ class BackwardChainingEngine:
         
         return fact_value == target_value, fact_value
     
-    def check_rule_antecedents(self, rule: Rule) -> Tuple[bool, List[str], Dict[str, str]]:
+    @staticmethod
+    def format_mismatch_details(mismatched: List[str]) -> str:
+        return "; ".join(mismatched)
+
+    def evaluate_or_group(
+        self, group: List[Dict[str, Any]]
+    ) -> Tuple[bool, List[str], List[str], Dict[str, str]]:
+        group_missing: List[str] = []
+        group_mismatch: List[Tuple[str, str, str]] = []
+
+        for item in group:
+            satisfied, value = self.check_antecedent(item)
+            if satisfied:
+                return True, [], [], {item['attr']: value}
+            if value is None:
+                group_missing.append(item['attr'])
+            else:
+                group_mismatch.append((item['attr'], value, item['value']))
+
+        mismatch_messages: List[str] = []
+        if group_mismatch:
+            grouped = {}
+            for attr, actual, expected in group_mismatch:
+                entry = grouped.setdefault(attr, {"actual": actual, "expected": set()})
+                entry["expected"].add(expected)
+            for attr, info in grouped.items():
+                expected_list = ", ".join(sorted(info["expected"]))
+                mismatch_messages.append(
+                    f"{attr}={info['actual']} (expected one of: {expected_list})"
+                )
+
+        unique_missing = list(dict.fromkeys(group_missing))
+        return False, unique_missing, mismatch_messages, {}
+
+    def check_rule_antecedents(self, rule: Rule) -> Tuple[bool, List[str], Dict[str, str], List[str]]:
         """
         Check all antecedents of a rule.
-        Returns (satisfied, missing_variables, current_values)
+        Returns (satisfied, missing_variables, current_values, mismatched_details)
         """
-        missing = []
-        current_values = {}
-        or_group_satisfied = False
-        or_group_vars = []
-        or_group_missing = []
-        
+        missing: List[str] = []
+        mismatched: List[str] = []
+        current_values: Dict[str, str] = {}
+
         i = 0
         while i < len(rule.antecedents):
             ant = rule.antecedents[i]
-            
-            # Check for OR operator (current or next condition has 'or' operator)
-            has_or = ant.get('operator') == 'or' or (i > 0 and rule.antecedents[i-1].get('operator') == 'or')
-            
-            if has_or:
-                or_group_vars.append(ant)
-                i += 1
-                continue
-            
-            # If we have collected OR group conditions
-            if or_group_vars:
-                or_satisfied = False
-                for or_ant in or_group_vars:
-                    satisfied, value = self.check_antecedent(or_ant)
-                    if satisfied:
-                        or_satisfied = True
-                        current_values[or_ant['attr']] = value
-                        break
-                    elif value is None:
-                        or_group_missing.append(or_ant['attr'])
-                
-                if not or_satisfied:
-                    missing.extend(or_group_missing)
-                    return False, missing, current_values
-                
-                or_group_vars = []
-                or_group_missing = []
-                or_group_satisfied = False
-                continue
-            
-            # Regular AND condition
+
+            if ant.get('operator') == 'or':
+                or_group = []
+                while i < len(rule.antecedents) and rule.antecedents[i].get('operator') == 'or':
+                    or_group.append(rule.antecedents[i])
+                    i += 1
+
+                group_ok, group_missing, group_mismatch, group_values = self.evaluate_or_group(or_group)
+                if group_ok:
+                    current_values.update(group_values)
+                    continue
+
+                missing.extend(group_missing)
+                mismatched.extend(group_mismatch)
+                return False, missing, current_values, mismatched
+
             satisfied, value = self.check_antecedent(ant)
             if satisfied:
                 current_values[ant['attr']] = value
                 i += 1
+                continue
+
+            if value is None:
+                missing.append(ant['attr'])
             else:
-                if value is None:
-                    missing.append(ant['attr'])
-                return False, missing, current_values
-        
-        # Handle remaining OR group at the end
-        if or_group_vars:
-            or_satisfied = False
-            for or_ant in or_group_vars:
-                satisfied, value = self.check_antecedent(or_ant)
-                if satisfied:
-                    or_satisfied = True
-                    current_values[or_ant['attr']] = value
-                    break
-                elif value is None:
-                    or_group_missing.append(or_ant['attr'])
-            
-            if not or_satisfied:
-                missing.extend(or_group_missing)
-                return False, missing, current_values
-        
-        return True, [], current_values
+                mismatched.append(f"{ant['attr']}={value} (expected {ant['value']})")
+            return False, missing, current_values, mismatched
+
+        return True, [], current_values, []
     
     def find_rules_for_goal(self, goal_attr: str, goal_value: str = None) -> List[Rule]:
         """Find rules that can derive the goal across all rule sets"""
@@ -376,7 +380,7 @@ class BackwardChainingEngine:
                             rule_id=rule.rule_id)
             
             # Check current satisfaction status
-            satisfied, missing, current_vals = self.check_rule_antecedents(rule)
+            satisfied, missing, current_vals, mismatched = self.check_rule_antecedents(rule)
             
             if satisfied:
                 # All antecedents satisfied - fire rule
@@ -391,9 +395,10 @@ class BackwardChainingEngine:
             else:
                 # Try to prove missing antecedents
                 if missing:
-                    self.add_debug_step('rule_missing', depth,
-                                    f"Rule {rule.rule_id} needs: {', '.join(missing)}",
-                                    rule_id=rule.rule_id)
+                    message = f"Rule {rule.rule_id} needs: {', '.join(missing)}"
+                    if mismatched:
+                        message += f" (mismatch: {self.format_mismatch_details(mismatched)})"
+                    self.add_debug_step('rule_missing', depth, message, rule_id=rule.rule_id)
                     
                     # Store current facts before trying to prove missing antecedents
                     facts_before = set(self.facts.keys())
@@ -426,7 +431,7 @@ class BackwardChainingEngine:
                                         f"Re-checking Rule {rule.rule_id} after proving subgoals...",
                                         rule_id=rule.rule_id)
                         
-                        satisfied, remaining_missing, _ = self.check_rule_antecedents(rule)
+                        satisfied, remaining_missing, _, remaining_mismatched = self.check_rule_antecedents(rule)
                         
                         if satisfied:
                             self.add_debug_step('rule_fire_after_subgoals', depth,
@@ -442,9 +447,10 @@ class BackwardChainingEngine:
                             # proven some, we should recursively try to prove the remaining ones
                             # instead of giving up on this rule
                             if remaining_missing:
-                                self.add_debug_step('rule_still_missing', depth,
-                                                f"Rule {rule.rule_id} still missing: {', '.join(remaining_missing)}",
-                                                rule_id=rule.rule_id)
+                                message = f"Rule {rule.rule_id} still missing: {', '.join(remaining_missing)}"
+                                if remaining_mismatched:
+                                    message += f" (mismatch: {self.format_mismatch_details(remaining_mismatched)})"
+                                self.add_debug_step('rule_still_missing', depth, message, rule_id=rule.rule_id)
                                 
                                 # Check which missing antecedents are new vs already attempted
                                 remaining_to_prove = []
@@ -477,7 +483,7 @@ class BackwardChainingEngine:
                                     
                                     if still_all_proven:
                                         # Final re-check after proving all remaining
-                                        satisfied, final_missing, _ = self.check_rule_antecedents(rule)
+                                        satisfied, final_missing, _, final_mismatched = self.check_rule_antecedents(rule)
                                         if satisfied:
                                             self.add_debug_step('rule_fire_after_all_subgoals', depth,
                                                             f"Rule {rule.rule_id} finally satisfied after proving all subgoals.",
@@ -488,35 +494,48 @@ class BackwardChainingEngine:
                                             self.goal_stack.pop()
                                             return True
                                         else:
-                                            self.add_debug_step('rule_fail', depth,
-                                                            f"Rule {rule.rule_id} still has missing: {', '.join(final_missing)}",
-                                                            rule_id=rule.rule_id)
+                                            message = f"Rule {rule.rule_id} still has missing: {', '.join(final_missing)}"
+                                            if final_mismatched:
+                                                message += f" (mismatch: {self.format_mismatch_details(final_mismatched)})"
+                                            self.add_debug_step('rule_fail', depth, message, rule_id=rule.rule_id)
                                     else:
-                                        self.add_debug_step('rule_fail', depth,
-                                                        f"Rule {rule.rule_id} failed - could not prove remaining antecedents",
-                                                        rule_id=rule.rule_id)
+                                        message = f"Rule {rule.rule_id} failed - could not prove remaining antecedents"
+                                        if remaining_mismatched:
+                                            message += f" (mismatch: {self.format_mismatch_details(remaining_mismatched)})"
+                                        self.add_debug_step('rule_fail', depth, message, rule_id=rule.rule_id)
                                 else:
                                     # All missing were already attempted but still missing - something wrong
                                     self.add_debug_step('rule_fail', depth,
                                                     f"Rule {rule.rule_id} failed - missing antecedents persist: {', '.join(remaining_missing)}",
                                                     rule_id=rule.rule_id)
                             else:
-                                # No missing but rule not satisfied - shouldn't happen
-                                self.add_debug_step('rule_fail', depth,
-                                                f"Rule {rule.rule_id} failed - no missing but not satisfied",
-                                                rule_id=rule.rule_id)
+                                mismatch_detail = self.format_mismatch_details(remaining_mismatched)
+                                if mismatch_detail:
+                                    self.add_debug_step('rule_fail', depth,
+                                                    f"Rule {rule.rule_id} failed: {mismatch_detail}",
+                                                    rule_id=rule.rule_id)
+                                else:
+                                    self.add_debug_step('rule_fail', depth,
+                                                    f"Rule {rule.rule_id} failed - no missing but not satisfied",
+                                                    rule_id=rule.rule_id)
                     else:
                         # Failed to prove some antecedents, try next rule
-                        self.add_debug_step('rule_fail', depth,
-                                        f"Rule {rule.rule_id} failed - could not prove all antecedents",
-                                        rule_id=rule.rule_id)
+                        message = f"Rule {rule.rule_id} failed - could not prove all antecedents"
+                        if mismatched:
+                            message += f" (mismatch: {self.format_mismatch_details(mismatched)})"
+                        self.add_debug_step('rule_fail', depth, message, rule_id=rule.rule_id)
                         # Continue to next rule
                         continue
                 else:
-                    # No missing variables but rule not satisfied (shouldn't happen)
-                    self.add_debug_step('rule_fail', depth,
-                                    f"Rule {rule.rule_id} failed for unknown reason",
-                                    rule_id=rule.rule_id)
+                    mismatch_detail = self.format_mismatch_details(mismatched)
+                    if mismatch_detail:
+                        self.add_debug_step('rule_fail', depth,
+                                        f"Rule {rule.rule_id} failed: {mismatch_detail}",
+                                        rule_id=rule.rule_id)
+                    else:
+                        self.add_debug_step('rule_fail', depth,
+                                        f"Rule {rule.rule_id} failed - no missing but not satisfied",
+                                        rule_id=rule.rule_id)
         
         self.add_debug_step('goal_fail', depth, f"Could not prove {goal_display} after trying all rules")
         self.goal_stack.pop()
@@ -548,7 +567,13 @@ class BackwardChainingEngine:
         
         # Get result
         result_value = self.get_fact(goal)
-        
+
+        # Ensure intermediate facts exist for display and CF calculations.
+        for attr in ['potensi_perkembangbiakan', 'iklim', 'faktor_eksposur_manusia']:
+            if self.get_fact(attr) is None:
+                self.add_debug_step('intermediate_goal', 0, f"Ensuring intermediate: {attr}", attribute=attr)
+                self.backward_chain(attr, depth=0)
+
         # Also derive intermediate results for display
         potensi = self.get_fact('potensi_perkembangbiakan')
         iklim_val = self.get_fact('iklim')
