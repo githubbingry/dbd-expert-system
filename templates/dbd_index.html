@@ -550,6 +550,7 @@
         function profileLine(profile) {
             const pieces = [
                 profile?.alamat,
+                profile?.kelurahan,
                 profile?.kecamatan,
                 profile?.kota,
                 profile?.provinsi
@@ -574,6 +575,9 @@
             list.innerHTML = history.slice(0, 6).map((record, index) => {
                 const profile = record.profile || {};
                 const level = record.result?.risk_level || "rendah";
+                const confidence = typeof record.result?.cf?.risk_percent === "number"
+                    ? `CF ${record.result.cf.risk_percent}%`
+                    : "CF -";
                 return `
                     <article class="history-item">
                         <div>
@@ -582,6 +586,7 @@
                                     <i class="fa-solid fa-circle"></i>${riskLabel(level)}
                                 </span>
                                 <span class="history-meta">${formatDate(record.createdAt)}</span>
+                                <span class="history-meta">${confidence}</span>
                             </div>
                             <h3>${escapeHtml(profile.nama || "Pengguna")}</h3>
                             <div class="history-meta">${escapeHtml(profileLine(profile))}</div>

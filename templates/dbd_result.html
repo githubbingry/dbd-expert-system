@@ -93,6 +93,18 @@
             max-width: 760px;
         }
 
+        .confidence-line {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            margin-top: 16px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: #f9fcfc;
+            font-weight: 800;
+        }
+
         .risk-chip {
             display: inline-flex;
             align-items: center;
@@ -370,6 +382,10 @@
                         </span>
                         <h1 class="result-title">Hasil Analisis Potensi DBD</h1>
                         <p class="result-message" id="riskMessage"></p>
+                        <div class="confidence-line" id="cfConfidence">
+                            <i class="fa-solid fa-percent"></i>
+                            <span>Confidence sistem: -</span>
+                        </div>
                     </div>
                     <div class="risk-meter" id="riskMeter" aria-hidden="true">
                         <i class="fa-solid fa-chart-line"></i>
@@ -518,6 +534,7 @@
             const rows = [
                 ["Nama", profile.nama],
                 ["Alamat", profile.alamat],
+                ["Kelurahan", profile.kelurahan],
                 ["Kecamatan", profile.kecamatan],
                 ["Kabupaten/Kota", profile.kota],
                 ["Provinsi", profile.provinsi],
@@ -534,17 +551,19 @@
 
         function renderIntermediate(result) {
             const intermediate = result.intermediate_results || {};
+            const cf = result.cf?.intermediate_cf || {};
             const items = [
-                ["Potensi Perkembangbiakan", intermediate.potensi_perkembangbiakan],
-                ["Kondisi Iklim", intermediate.kondisi_iklim],
-                ["Faktor Eksposur", intermediate.faktor_eksposur]
+                ["Potensi Perkembangbiakan", intermediate.potensi_perkembangbiakan, cf.potensi_perkembangbiakan],
+                ["Kondisi Iklim", intermediate.kondisi_iklim, cf.kondisi_iklim],
+                ["Faktor Eksposur", intermediate.faktor_eksposur, cf.faktor_eksposur]
             ];
 
-            document.getElementById("intermediateGrid").innerHTML = items.map(([label, value]) => `
+            document.getElementById("intermediateGrid").innerHTML = items.map(([label, value, itemCf]) => `
                 <div class="col-md-4">
                     <div class="intermediate-card">
                         <span>${label}</span>
                         <strong>${escapeHtml(titleCaseValue(value))}</strong>
+                        <span>CF ${typeof itemCf === "number" ? Math.round(itemCf * 10000) / 100 + "%" : "-"}</span>
                     </div>
                 </div>
             `).join("");
@@ -607,6 +626,11 @@
             meter.className = `risk-meter ${level}`;
             document.getElementById("riskLabel").textContent = riskLabels[level] || "Risiko Tidak Diketahui";
             document.getElementById("riskMessage").textContent = riskMessages[level] || record.result.risk_message || "";
+            const cf = record.result.cf;
+            const cfText = cf && typeof cf.risk_percent === "number"
+                ? `${cf.risk_percent}% (${cf.valid ? "valid" : "di bawah threshold"})`
+                : "-";
+            document.querySelector("#cfConfidence span").textContent = `Confidence sistem: ${cfText}`;
 
             renderProfile(record);
             renderIntermediate(record.result);
