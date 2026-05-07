@@ -630,7 +630,7 @@
             const cfText = cf && typeof cf.risk_percent === "number"
                 ? `${cf.risk_percent}% (${cf.valid ? "valid" : "di bawah threshold"})`
                 : "-";
-            document.querySelector("#cfConfidence span").textContent = `Confidence sistem: ${cfText}`;
+            document.querySelector("#cfConfidence span").textContent = `Certainty sistem: ${cfText}`;
 
             renderProfile(record);
             renderIntermediate(record.result);
