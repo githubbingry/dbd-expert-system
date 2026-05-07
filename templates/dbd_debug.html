@@ -250,7 +250,7 @@
 
         .result-strip {
             display: none;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 12px;
             margin-bottom: 16px;
         }
@@ -406,6 +406,10 @@
                                 <div class="result-box">
                                     <span>Tingkat Risiko</span>
                                     <strong id="riskResult">-</strong>
+                                </div>
+                                <div class="result-box">
+                                    <span>CF Risiko</span>
+                                    <strong id="riskCf">0%</strong>
                                 </div>
                                 <div class="result-box">
                                     <span>Executed Rules</span>
@@ -594,6 +598,7 @@
             const rules = result.executed_rules || [];
             const facts = result.all_facts || {};
             document.getElementById("riskResult").textContent = titleCaseValue(result.risk_level);
+            document.getElementById("riskCf").textContent = result.cf ? `${result.cf.risk_percent}%` : "0%";
             document.getElementById("executedCount").textContent = rules.length;
             document.getElementById("factCount").textContent = Object.keys(facts).length;
 

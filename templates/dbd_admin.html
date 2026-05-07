@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - DBD Care</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #17324d;
+            --muted: #64748b;
+            --line: #d9e4ea;
+            --soft: #f4f9f8;
+            --teal: #0f766e;
+            --teal-dark: #115e59;
+            --red: #be123c;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f7fbfb;
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--teal);
+            color: #fff;
+        }
+
+        .admin-page {
+            padding: 28px 0 54px;
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        .panel-head {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .panel-body {
+            padding: 18px;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .tab-btn,
+        .btn-health,
+        .btn-outline-health,
+        .btn-danger-soft {
+            min-height: 42px;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn,
+        .btn-outline-health {
+            border: 1px solid #9ab0bd;
+            background: #fff;
+            color: var(--ink);
+        }
+
+        .tab-btn.active,
+        .btn-health {
+            border: 1px solid var(--teal);
+            background: var(--teal);
+            color: #fff;
+        }
+
+        .btn-health:hover {
+            background: var(--teal-dark);
+            border-color: var(--teal-dark);
+            color: #fff;
+        }
+
+        .btn-danger-soft {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: var(--red);
+        }
+
+        .form-label {
+            font-weight: 800;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 8px;
+            border-color: #bfd0d8;
+        }
+
+        textarea.form-control {
+            min-height: 118px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9rem;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .table {
+            color: var(--ink);
+        }
+
+        .table thead {
+            background: var(--soft);
+        }
+
+        .option-row {
+            display: grid;
+            grid-template-columns: 150px 150px 110px 1fr auto;
+            gap: 10px;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .small-muted {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .status-box {
+            display: none;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .status-box.success {
+            display: block;
+            color: #15803d;
+            background: #eaf7ed;
+            border: 1px solid #bce3c5;
+        }
+
+        .status-box.error {
+            display: block;
+            color: var(--red);
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+        }
+
+        @media (max-width: 991px) {
+            .option-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="brand-mark"><i class="fa-solid fa-sliders"></i></span>
+                <div>
+                    <div class="fw-bold">Admin DBD Care</div>
+                    <div class="small-muted">Kelola rule, pertanyaan, opsi, dan certainty factor.</div>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn-outline-health text-decoration-none" href="/dev"><i class="fa-solid fa-code-branch"></i>Dev</a>
+                <a class="btn-outline-health text-decoration-none" href="/"><i class="fa-solid fa-house"></i>Beranda</a>
+                <a class="btn-danger-soft text-decoration-none" href="/logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-page">
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-btn active" type="button" data-tab="rules"><i class="fa-solid fa-gavel"></i>Rules</button>
+                <button class="tab-btn" type="button" data-tab="questions"><i class="fa-solid fa-list-check"></i>Pertanyaan dan Opsi</button>
+            </div>
+
+            <div id="statusBox" class="status-box"></div>
+
+            <section id="rulesSection" class="admin-section active">
+                <div class="row g-4">
+                    <div class="col-xl-7">
+                        <div class="panel">
+                            <div class="panel-head">
+                                <h1 class="h5 fw-bold mb-0">Daftar Rule</h1>
+                                <button class="btn-health" type="button" id="newRuleBtn"><i class="fa-solid fa-plus"></i>Rule Baru</button>
+                            </div>
+                            <div class="panel-body table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Set</th>
+                                            <th>Consequent</th>
+                                            <th>CF</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rulesTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5">
+                        <div class="panel">
+                            <div class="panel-head">
+                                <h2 class="h5 fw-bold mb-0">Editor Rule</h2>
+                            </div>
+                            <div class="panel-body">
+                                <form id="ruleForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="ruleId">ID</label>
+                                            <input class="form-control" id="ruleId" type="number" min="1" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="ruleSet">Set</label>
+                                            <input class="form-control" id="ruleSet" type="number" min="1" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="ruleCf">CF Rule</label>
+                                            <input class="form-control" id="ruleCf" type="number" min="0" max="100" step="0.01" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" for="ruleAntecedents">Antecedents JSON</label>
+                                            <textarea class="form-control" id="ruleAntecedents" required></textarea>
+                                            <div class="small-muted mt-1">Contoh: [{"attr":"genangan_air_terbuka","value":"ada"}]</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" for="ruleConsequent">Consequent JSON</label>
+                                            <textarea class="form-control" id="ruleConsequent" required></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" for="ruleDescription">Deskripsi</label>
+                                            <textarea class="form-control" id="ruleDescription"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2 mt-3">
+                                        <button class="btn-health" type="submit"><i class="fa-solid fa-floppy-disk"></i>Simpan Rule</button>
+                                        <button class="btn-danger-soft" type="button" id="deleteRuleBtn"><i class="fa-solid fa-trash-can"></i>Hapus Rule</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="questionsSection" class="admin-section">
+                <div class="panel">
+                    <div class="panel-head">
+                        <h1 class="h5 fw-bold mb-0">Pertanyaan dan Opsi Jawaban</h1>
+                        <select class="form-select w-auto" id="questionSelect"></select>
+                    </div>
+                    <div class="panel-body">
+                        <form id="questionForm">
+                            <div class="mb-3">
+                                <label class="form-label" for="questionText">Teks Pertanyaan</label>
+                                <input class="form-control" id="questionText" required>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center mb-2">
+                                <h2 class="h6 fw-bold mb-0">Opsi, Deskripsi, dan CF Input</h2>
+                                <button class="btn-outline-health" type="button" id="addOptionBtn"><i class="fa-solid fa-plus"></i>Tambah Opsi</button>
+                            </div>
+                            <div id="optionRows"></div>
+                            <button class="btn-health mt-3" type="submit"><i class="fa-solid fa-floppy-disk"></i>Simpan Pertanyaan</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        let state = null;
+        let selectedRuleId = null;
+        let selectedQuestionKey = null;
+
+        const statusBox = document.getElementById("statusBox");
+
+        function showStatus(message, type = "success") {
+            statusBox.textContent = message;
+            statusBox.className = `status-box ${type}`;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement("div");
+            div.textContent = value ?? "";
+            return div.innerHTML;
+        }
+
+        async function api(url, options = {}) {
+            const response = await fetch(url, {
+                headers: { "Content-Type": "application/json" },
+                ...options
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "Request gagal.");
+            }
+            return data;
+        }
+
+        async function loadConfig() {
+            state = await api("/api/admin/config");
+            renderRules();
+            renderQuestionPicker();
+        }
+
+        function ruleConsequentText(rule) {
+            return Object.entries(rule.consequent || {}).map(([key, value]) => `${key}=${value}`).join(", ");
+        }
+
+        function renderRules() {
+            document.getElementById("rulesTable").innerHTML = state.rules.map((rule) => `
+                <tr>
+                    <td class="fw-bold">R${rule.id}</td>
+                    <td>${rule.set}</td>
+                    <td>${escapeHtml(ruleConsequentText(rule))}</td>
+                    <td>${Math.round((Number(rule.cf) || 0) * 100)}%</td>
+                    <td><button class="btn-outline-health btn-sm" type="button" data-rule-id="${rule.id}">Edit</button></td>
+                </tr>
+            `).join("");
+            document.querySelectorAll("[data-rule-id]").forEach((button) => {
+                button.addEventListener("click", () => selectRule(Number(button.dataset.ruleId)));
+            });
+            if (!selectedRuleId && state.rules.length) {
+                selectRule(state.rules[0].id);
+            }
+        }
+
+        function selectRule(ruleId) {
+            const rule = state.rules.find((item) => Number(item.id) === Number(ruleId));
+            if (!rule) return;
+            selectedRuleId = rule.id;
+            document.getElementById("ruleId").value = rule.id;
+            document.getElementById("ruleSet").value = rule.set;
+            document.getElementById("ruleCf").value = Math.round((Number(rule.cf) || 0) * 10000) / 100;
+            document.getElementById("ruleAntecedents").value = JSON.stringify(rule.antecedents || [], null, 2);
+            document.getElementById("ruleConsequent").value = JSON.stringify(rule.consequent || {}, null, 2);
+            document.getElementById("ruleDescription").value = rule.description || "";
+        }
+
+        function newRule() {
+            const maxId = Math.max(0, ...state.rules.map((rule) => Number(rule.id)));
+            selectedRuleId = null;
+            document.getElementById("ruleId").value = maxId + 1;
+            document.getElementById("ruleSet").value = 1;
+            document.getElementById("ruleCf").value = 80;
+            document.getElementById("ruleAntecedents").value = JSON.stringify([{ attr: "genangan_air_terbuka", value: "ada" }], null, 2);
+            document.getElementById("ruleConsequent").value = JSON.stringify({ tingkat_resiko_dbd: "sedang" }, null, 2);
+            document.getElementById("ruleDescription").value = "";
+        }
+
+        async function saveRule(event) {
+            event.preventDefault();
+            try {
+                const payload = {
+                    id: Number(document.getElementById("ruleId").value),
+                    set: Number(document.getElementById("ruleSet").value),
+                    cf: Number(document.getElementById("ruleCf").value) / 100,
+                    antecedents: JSON.parse(document.getElementById("ruleAntecedents").value),
+                    consequent: JSON.parse(document.getElementById("ruleConsequent").value),
+                    description: document.getElementById("ruleDescription").value
+                };
+                await api("/api/admin/rules", { method: "POST", body: JSON.stringify(payload) });
+                showStatus("Rule berhasil disimpan.");
+                await loadConfig();
+                selectRule(payload.id);
+            } catch (error) {
+                showStatus(error.message, "error");
+            }
+        }
+
+        async function deleteRule() {
+            const id = Number(document.getElementById("ruleId").value);
+            if (!id || !confirm(`Hapus Rule ${id}?`)) return;
+            try {
+                await api(`/api/admin/rules/${id}`, { method: "DELETE" });
+                showStatus("Rule berhasil dihapus.");
+                selectedRuleId = null;
+                await loadConfig();
+            } catch (error) {
+                showStatus(error.message, "error");
+            }
+        }
+
+        function renderQuestionPicker() {
+            const select = document.getElementById("questionSelect");
+            select.innerHTML = state.input_variables.map((key) => `<option value="${key}">${key.replaceAll("_", " ")}</option>`).join("");
+            selectedQuestionKey = selectedQuestionKey || state.input_variables[0];
+            select.value = selectedQuestionKey;
+            renderQuestionForm();
+        }
+
+        function renderQuestionForm() {
+            const question = state.questions[selectedQuestionKey];
+            document.getElementById("questionText").value = question.text || "";
+            const rows = document.getElementById("optionRows");
+            rows.innerHTML = Object.entries(question.options || {}).map(([value, label]) => optionRowTemplate(
+                value,
+                label,
+                question.explanation?.[value] || "",
+                state.cf_config.user_cf?.[selectedQuestionKey]?.[value] ?? 1
+            )).join("");
+            bindOptionButtons();
+        }
+
+        function optionRowTemplate(value = "", label = "", explanation = "", cf = 1) {
+            return `
+                <div class="option-row">
+                    <input class="form-control option-value" placeholder="value" value="${escapeHtml(value)}">
+                    <input class="form-control option-label" placeholder="label" value="${escapeHtml(label)}">
+                    <input class="form-control option-cf" type="number" min="0" max="100" step="0.01" placeholder="CF %" value="${Math.round(Number(cf) * 10000) / 100}">
+                    <textarea class="form-control option-description" placeholder="deskripsi">${escapeHtml(explanation)}</textarea>
+                    <button class="btn-danger-soft remove-option" type="button"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `;
+        }
+
+        function bindOptionButtons() {
+            document.querySelectorAll(".remove-option").forEach((button) => {
+                button.addEventListener("click", () => button.closest(".option-row").remove());
+            });
+        }
+
+        function addOption() {
+            document.getElementById("optionRows").insertAdjacentHTML("beforeend", optionRowTemplate("", "", "", 1));
+            bindOptionButtons();
+        }
+
+        async function saveQuestion(event) {
+            event.preventDefault();
+            const options = {};
+            const explanation = {};
+            const user_cf = {};
+            document.querySelectorAll(".option-row").forEach((row) => {
+                const value = row.querySelector(".option-value").value.trim();
+                const label = row.querySelector(".option-label").value.trim();
+                const desc = row.querySelector(".option-description").value.trim();
+                const cf = Number(row.querySelector(".option-cf").value) / 100;
+                if (value) {
+                    options[value] = label;
+                    explanation[value] = desc;
+                    user_cf[value] = cf;
+                }
+            });
+
+            try {
+                await api(`/api/admin/questions/${selectedQuestionKey}`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        text: document.getElementById("questionText").value,
+                        options,
+                        explanation,
+                        user_cf
+                    })
+                });
+                showStatus("Pertanyaan dan opsi berhasil disimpan.");
+                await loadConfig();
+            } catch (error) {
+                showStatus(error.message, "error");
+            }
+        }
+
+        document.querySelectorAll("[data-tab]").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll("[data-tab]").forEach((item) => item.classList.remove("active"));
+                button.classList.add("active");
+                document.querySelectorAll(".admin-section").forEach((section) => section.classList.remove("active"));
+                document.getElementById(`${button.dataset.tab}Section`).classList.add("active");
+            });
+        });
+
+        document.getElementById("newRuleBtn").addEventListener("click", newRule);
+        document.getElementById("ruleForm").addEventListener("submit", saveRule);
+        document.getElementById("deleteRuleBtn").addEventListener("click", deleteRule);
+        document.getElementById("questionSelect").addEventListener("change", (event) => {
+            selectedQuestionKey = event.target.value;
+            renderQuestionForm();
+        });
+        document.getElementById("addOptionBtn").addEventListener("click", addOption);
+        document.getElementById("questionForm").addEventListener("submit", saveQuestion);
+
+        loadConfig().catch((error) => showStatus(error.message, "error"));
+    </script>
+</body>
+</html>

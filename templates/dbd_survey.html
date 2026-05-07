@@ -464,6 +464,10 @@
                                     <input id="alamat" name="alamat" class="form-control" required>
                                 </div>
                                 <div class="col-md-6">
+                                    <label for="kelurahan" class="form-label">Kelurahan</label>
+                                    <input id="kelurahan" name="kelurahan" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
                                     <label for="kecamatan" class="form-label">Kecamatan</label>
                                     <input id="kecamatan" name="kecamatan" class="form-control" required>
                                 </div>
@@ -574,6 +578,7 @@
             return {
                 nama: document.getElementById("nama").value.trim(),
                 alamat: document.getElementById("alamat").value.trim(),
+                kelurahan: document.getElementById("kelurahan").value.trim(),
                 kecamatan: document.getElementById("kecamatan").value.trim(),
                 kota: document.getElementById("kota").value.trim(),
                 provinsi: document.getElementById("provinsi").value.trim()
@@ -584,7 +589,7 @@
             const profile = getProfile();
             const missing = Object.entries(profile).find(([, value]) => !value);
             if (missing) {
-                showAlert("Lengkapi nama, alamat, kecamatan, kabupaten/kota, dan provinsi terlebih dahulu.");
+                showAlert("Lengkapi nama, alamat, kelurahan, kecamatan, kabupaten/kota, dan provinsi terlebih dahulu.");
                 return false;
             }
             return true;
